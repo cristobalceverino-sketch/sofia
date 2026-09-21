@@ -149,7 +149,7 @@ calendario_sorpresas = {
         ),
         "video": "video_flores_amarillas.mp4",
     },
-    "31-10": {
+    "21-09": {
         "tipo": "pareja",
         "titulo": "???",
         "password": "???",  # Cambia por la clave secreta de ese día
