@@ -160,7 +160,7 @@ calendario_sorpresas = {
     "31-10": {
         "tipo": "pareja",
         "titulo": "???",
-        "password": "tu_contraseña_aqui",
+        "password": "???",
         "poema": (
             '"Entre risas, miradas y casualidades,<br>'
             "llegaste a mi vida a cambiar las verdades.<br>"
