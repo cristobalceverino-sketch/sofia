@@ -1,4 +1,5 @@
 import base64
+import random
 from datetime import datetime
 os = __import__("os")
 import streamlit as st
@@ -86,6 +87,41 @@ st.markdown(
         color: white;
     }}
 
+    /* Animaciones de ataque para los sprites */
+    @keyframes atornillar-jugador {{
+        0% {{ transform: translateX(0); }}
+        50% {{ transform: translateX(30px) scale(1.05); }}
+        100% {{ transform: translateX(0); }}
+    }}
+    
+    @keyframes atornillar-rival {{
+        0% {{ transform: translateX(0); }}
+        50% {{ transform: translateX(-30px) scale(1.05); }}
+        100% {{ transform: translateX(0); }}
+    }}
+
+    .sprite-animado-jugador {{
+        animation: atornillar-jugador 0.4s ease;
+    }}
+
+    .sprite-animado-rival {{
+        animation: atornillar-rival 0.4s ease;
+    }}
+
+    /* Consola pequeña y discreta para el último ataque del rival */
+    .consola-rival {{
+        background-color: #111;
+        border: 2px solid #ff5252;
+        border-radius: 8px;
+        padding: 10px 15px;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        color: #ff8a80;
+        margin-bottom: 15px;
+        text-align: center;
+        box-shadow: inset 0 0 10px rgba(255, 82, 82, 0.2);
+    }}
+
     /* Animación de corazones flotantes normales */
     @keyframes flotar {{
         0% {{ transform: translateY(0vh) scale(0.8); opacity: 0; }}
@@ -101,14 +137,6 @@ st.markdown(
         animation: flotar 6s infinite linear;
         z-index: 1;
         user-select: none;
-    }}
-
-    .arena-pokemon {{
-        background: #111;
-        border: 3px solid #ff5252;
-        border-radius: 10px;
-        padding: 20px;
-        text-align: center;
     }}
     </style>
 
@@ -190,7 +218,6 @@ calendario_sorpresas = {
         "sprite_rival": (
             "https://play.pokemonshowdown.com/sprites/gen5/sylveon.png"
         ),
-        # Sprite seleccionado para el premio al ganar
         "sprite_premio": (
             "https://play.pokemonshowdown.com/sprites/gen5/jigglypuff.png"
         ),
@@ -350,6 +377,12 @@ if hoy in calendario_sorpresas:
             st.session_state["fase_31"] = "batalla_pokemon"
             st.session_state["hp_rival"] = 100
             st.session_state["hp_usuario"] = 100
+            st.session_state["ultimo_movimiento_rival"] = (
+                "¡El combate está por empezar!"
+            )
+            st.session_state["animacion_sprite"] = (
+                "ninguna"  # Control de animación
+            )
             st.rerun()
         else:
           if "contador_no" not in st.session_state:
@@ -380,7 +413,7 @@ if hoy in calendario_sorpresas:
               st.session_state["contador_no"] += 1
               st.rerun()
 
-      # 3. FASE DE LA BATALLA POKÉMON CON 4 ATAQUES REALES Y CONTRAATAQUE
+      # 3. FASE DE LA BATALLA POKÉMON CON CONSOLA Y ANIMACIÓN DE SPRITES
       elif st.session_state["fase_31"] == "batalla_pokemon":
         try:
           st.audio(regalo["musica_batalla"], autoplay=True, loop=True)
@@ -395,9 +428,30 @@ if hoy in calendario_sorpresas:
         hp_r = st.session_state["hp_rival"]
         hp_u = st.session_state["hp_usuario"]
 
+        # Consola discreta con el último ataque del rival
+        st.markdown(
+            f"""
+            <div class="consola-rival">
+                🖥️ CONSOLA RIVAL: {st.session_state.get('ultimo_movimiento_rival', 'Esperando movimiento...')}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        # Determinar clases de animación para los sprites
+        anim = st.session_state.get("animacion_sprite", "ninguna")
+        clase_jugador = (
+            "sprite-animado-jugador" if anim == "jugador" else ""
+        )
+        clase_rival = "sprite-animado-rival" if anim == "rival" else ""
+
         col_sprite_r, col_info_r = st.columns([1, 2])
         with col_sprite_r:
+          st.markdown(
+              f'<div class="{clase_rival}">', unsafe_allow_html=True
+          )
           st.image(regalo["sprite_rival"], width=120)
+          st.markdown("</div>", unsafe_allow_html=True)
         with col_info_r:
           st.markdown(f"**Rival: {regalo['pokemon_rival']} (Lv. 50)**")
           st.text(f"HP: {hp_r}%")
@@ -409,50 +463,59 @@ if hoy in calendario_sorpresas:
           st.markdown(f"**Tu equipo: {regalo['pokemon_jugador']} (Lv. 50)**")
           st.text(f"HP: {hp_u}%")
         with col_sprite_u:
+          st.markdown(
+              f'<div class="{clase_jugador}">', unsafe_allow_html=True
+          )
           st.image(regalo["sprite_jugador"], width=120)
+          st.markdown("</div>", unsafe_allow_html=True)
 
         st.markdown("---")
         st.write("### Elige tu movimiento (4 Ataques reales):")
 
-        # 4 botones organizados en 2 columnas para los ataques reales de Pikachu
+        # Función auxiliar para gestionar turnos de la máquina
+        def procesar_turno_jugador(danio_jugador):
+          st.session_state["hp_rival"] -= danio_jugador
+          st.session_state["animacion_sprite"] = "jugador"
+
+          if st.session_state["hp_rival"] <= 0:
+            st.session_state["hp_rival"] = 0
+            st.session_state["fase_31"] = "victoria"
+          else:
+            # Turno del Rival (Sylveon ataca de vuelta)
+            ataques_rival = [
+                ("Fuerza Lunar", 20),
+                ("Voz Cautivadora", 15),
+                ("Besos Drenaje", 25),
+                ("Rapidez", 18),
+            ]
+            nombre_atq, danio_atq = random.choice(ataques_rival)
+            st.session_state["hp_usuario"] -= danio_atq
+            st.session_state["animacion_sprite"] = "rival"
+            st.session_state["ultimo_movimiento_rival"] = (
+                f"¡{regalo['pokemon_rival']} usó {nombre_atq} y te causó"
+                f" {danio_atq}% de daño!"
+            )
+
+            if st.session_state["hp_usuario"] <= 0:
+              st.session_state["hp_usuario"] = 0
+              st.session_state["fase_31"] = "derrota"
+          st.rerun()
+
+        # Botones de ataque
         col_atq1, col_atq2 = st.columns(2)
         with col_atq1:
           if st.button("Impactrueno"):
-            st.session_state["hp_rival"] -= 20
-            st.session_state["hp_usuario"] -= 15
-            if st.session_state["hp_usuario"] <= 0:
-              st.session_state["fase_31"] = "derrota"
-            elif st.session_state["hp_rival"] <= 0:
-              st.session_state["fase_31"] = "victoria"
-            st.rerun()
+            procesar_turno_jugador(20)
 
           if st.button("Ataque Rápido"):
-            st.session_state["hp_rival"] -= 15
-            st.session_state["hp_usuario"] -= 15
-            if st.session_state["hp_usuario"] <= 0:
-              st.session_state["fase_31"] = "derrota"
-            elif st.session_state["hp_rival"] <= 0:
-              st.session_state["fase_31"] = "victoria"
-            st.rerun()
+            procesar_turno_jugador(15)
 
         with col_atq2:
           if st.button("Cola Férrea"):
-            st.session_state["hp_rival"] -= 30
-            st.session_state["hp_usuario"] -= 20
-            if st.session_state["hp_usuario"] <= 0:
-              st.session_state["fase_31"] = "derrota"
-            elif st.session_state["hp_rival"] <= 0:
-              st.session_state["fase_31"] = "victoria"
-            st.rerun()
+            procesar_turno_jugador(30)
 
           if st.button("Rayo"):
-            st.session_state["hp_rival"] -= 35
-            st.session_state["hp_usuario"] -= 25
-            if st.session_state["hp_usuario"] <= 0:
-              st.session_state["fase_31"] = "derrota"
-            elif st.session_state["hp_rival"] <= 0:
-              st.session_state["fase_31"] = "victoria"
-            st.rerun()
+            procesar_turno_jugador(35)
 
       # 4. FASE DE DERROTA EN LA BATALLA
       elif st.session_state["fase_31"] == "derrota":
@@ -463,6 +526,9 @@ if hoy in calendario_sorpresas:
         if st.button("Reintentar Combate"):
           st.session_state["hp_rival"] = 100
           st.session_state["hp_usuario"] = 100
+          st.session_state["ultimo_movimiento_rival"] = (
+              "¡Nuevo intento de combate!"
+          )
           st.session_state["fase_31"] = "batalla_pokemon"
           st.rerun()
 
@@ -474,7 +540,6 @@ if hoy in calendario_sorpresas:
             unsafe_allow_html=True,
         )
 
-        # Mostramos el sprite seleccionado del premio al ganar
         col_img_premio, col_txt_premio = st.columns([1, 2])
         with col_img_premio:
           st.image(regalo["sprite_premio"], width=130)
