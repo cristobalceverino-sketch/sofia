@@ -209,6 +209,7 @@ calendario_sorpresas = {
             "¡El botón de al lado es mejor!",
         ],
         "musica_romantica": "musica_romantica.mp3",
+        "musica_triste": "musica_triste.mp3",  # Canción triste al agotar los No
         "musica_batalla": "musica_pokemon.mp3",
         "pokemon_jugador": "Pikachu",
         "sprite_jugador": (
@@ -334,11 +335,21 @@ if hoy in calendario_sorpresas:
             st.error("Contraseña incorrecta. ¡Inténtalo de nuevo!")
 
       # 2. FASE DEL POEMA Y PREGUNTA
-      elif st.session_state["fase_31"] in ["poema", "exito_aceptado"]:
-        try:
-          st.audio(regalo["musica_romantica"], autoplay=True, loop=True)
-        except Exception:
-          pass
+      elif st.session_state["fase_31"] in [
+          "poema",
+          "exito_aceptado",
+          "rechazo_final",
+      ]:
+        if st.session_state["fase_31"] == "rechazo_final":
+          try:
+            st.audio(regalo["musica_triste"], autoplay=True, loop=True)
+          except Exception:
+            pass
+        else:
+          try:
+            st.audio(regalo["musica_romantica"], autoplay=True, loop=True)
+          except Exception:
+            pass
 
         st.success("¡Contraseña correcta! Desbloqueando momento especial...")
 
@@ -380,20 +391,27 @@ if hoy in calendario_sorpresas:
             st.session_state["ultimo_movimiento_rival"] = (
                 "¡El combate está por empezar!"
             )
-            st.session_state["animacion_sprite"] = (
-                "ninguna"  # Control de animación
-            )
+            st.session_state["animacion_sprite"] = "ninguna"
             st.rerun()
+
+        elif st.session_state["fase_31"] == "rechazo_final":
+          st.warning(
+              "Has presionado el último 'No'... aunque duele, respeto tu"
+              " decisión. ¡Gracias por llegar hasta aquí y por todo este tiempo"
+              " juntos!"
+          )
+          st.write(
+              "*(Se ha registrado tu respuesta final en el sistema con una"
+              " melodía nostálgica)*"
+          )
+
         else:
           if "contador_no" not in st.session_state:
             st.session_state["contador_no"] = 0
 
           frases_no = regalo["frases_no"]
-          texto_actual_no = frases_no[
-              min(
-                  st.session_state["contador_no"], len(frases_no) - 1
-              )
-          ]
+          indice_actual = st.session_state["contador_no"]
+          texto_actual_no = frases_no[min(indice_actual, len(frases_no) - 1)]
 
           ancho_si = min(2 + (st.session_state["contador_no"] * 2), 10)
           ancho_no = max(4 - st.session_state["contador_no"], 1)
@@ -410,7 +428,14 @@ if hoy in calendario_sorpresas:
 
           with col2:
             if st.button(texto_actual_no, key="btn_rechazo"):
-              st.session_state["contador_no"] += 1
+              # Validar si es el último botón de "No" de la lista
+              if indice_actual >= len(frases_no) - 1:
+                guardar_preferencia_formato(
+                    "Dijo que NO hasta el final", "31 de Octubre"
+                )
+                st.session_state["fase_31"] = "rechazo_final"
+              else:
+                st.session_state["contador_no"] += 1
               st.rerun()
 
       # 3. FASE DE LA BATALLA POKÉMON CON CONSOLA Y ANIMACIÓN DE SPRITES
@@ -428,7 +453,6 @@ if hoy in calendario_sorpresas:
         hp_r = st.session_state["hp_rival"]
         hp_u = st.session_state["hp_usuario"]
 
-        # Consola discreta con el último ataque del rival
         st.markdown(
             f"""
             <div class="consola-rival">
@@ -438,7 +462,6 @@ if hoy in calendario_sorpresas:
             unsafe_allow_html=True,
         )
 
-        # Determinar clases de animación para los sprites
         anim = st.session_state.get("animacion_sprite", "ninguna")
         clase_jugador = (
             "sprite-animado-jugador" if anim == "jugador" else ""
@@ -472,7 +495,6 @@ if hoy in calendario_sorpresas:
         st.markdown("---")
         st.write("### Elige tu movimiento (4 Ataques reales):")
 
-        # Función auxiliar para gestionar turnos de la máquina
         def procesar_turno_jugador(danio_jugador):
           st.session_state["hp_rival"] -= danio_jugador
           st.session_state["animacion_sprite"] = "jugador"
@@ -481,7 +503,6 @@ if hoy in calendario_sorpresas:
             st.session_state["hp_rival"] = 0
             st.session_state["fase_31"] = "victoria"
           else:
-            # Turno del Rival (Sylveon ataca de vuelta)
             ataques_rival = [
                 ("Fuerza Lunar", 20),
                 ("Voz Cautivadora", 15),
@@ -501,7 +522,6 @@ if hoy in calendario_sorpresas:
               st.session_state["fase_31"] = "derrota"
           st.rerun()
 
-        # Botones de ataque
         col_atq1, col_atq2 = st.columns(2)
         with col_atq1:
           if st.button("Impactrueno"):
