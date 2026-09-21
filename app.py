@@ -160,7 +160,7 @@ calendario_sorpresas = {
     "31-10": {
         "tipo": "pareja",
         "titulo": "???",
-        "password": "???",
+        "password": "tu_contraseña_aqui",
         "poema": (
             '"Entre risas, miradas y casualidades,<br>'
             "llegaste a mi vida a cambiar las verdades.<br>"
@@ -180,12 +180,17 @@ calendario_sorpresas = {
             "Imposible aceptar esto",
             "¡El botón de al lado es mejor!",
         ],
-        "musica_romantica": "musica_romantica.mp3",  # Sube este archivo a GitHub
-        "musica_batalla": "musica_pokemon.mp3",  # Sube este archivo a GitHub
+        "musica_romantica": "musica_romantica.mp3",
+        "musica_batalla": "musica_pokemon.mp3",
         "pokemon_jugador": "Pikachu",
-        "sprite_jugador": "https://play.pokemonshowdown.com/sprites/gen5/pikachu.png",
+        # Sprite frontal/trasero fijo y garantizado
+        "sprite_jugador": (
+            "https://play.pokemonshowdown.com/sprites/gen5/pikachu.png"
+        ),
         "pokemon_rival": "Sylveon",
-        "sprite_rival": "https://play.pokemonshowdown.com/sprites/gen5/sylveon.png",
+        "sprite_rival": (
+            "https://play.pokemonshowdown.com/sprites/gen5/sylveon.png"
+        ),
         "pokemon_premio": (
             "¡Has ganado la batalla y tu premio secreto! Una cita especial o"
             " regalito por desbloquear mi corazón."
@@ -204,7 +209,8 @@ with st.expander("Panel de creador (Oculto)"):
       "Clave de administrador:", type="password", key="admin_pass"
   )
 
-  if pass_admin == "cristobal123":
+  # Contraseña actualizada a NEOX
+  if pass_admin == "NEOX":
     st.success("¡Acceso concedido!")
 
     st.markdown("---")
@@ -300,7 +306,6 @@ if hoy in calendario_sorpresas:
 
       # 2. FASE DEL POEMA Y PREGUNTA
       elif st.session_state["fase_31"] in ["poema", "exito_aceptado"]:
-        # Reproductor de música romántica de fondo
         try:
           st.audio(regalo["musica_romantica"], autoplay=True, loop=True)
         except Exception:
@@ -330,7 +335,6 @@ if hoy in calendario_sorpresas:
         st.markdown("### La Pregunta Más Importante...")
         st.write(regalo["pregunta"])
 
-        # Si ya aceptó previamente, mostramos directamente el mensaje de éxito y la opción opcional de la batalla
         if st.session_state["fase_31"] == "exito_aceptado":
           st.success(
               "¡Has aceptado ser mi pareja! Tu respuesta ya ha sido guardada"
@@ -363,11 +367,9 @@ if hoy in calendario_sorpresas:
 
           with col1:
             if st.button("¡SÍ, QUIERO!"):
-              # GUARDADO INMEDIATO Y SEGURO DE LA RESPUESTA
               guardar_preferencia_formato(
                   "Aceptó ser mi pareja", "31 de Octubre"
               )
-              # Cambiamos a estado de éxito sin forzar la batalla
               st.session_state["fase_31"] = "exito_aceptado"
               st.rerun()
 
@@ -376,18 +378,16 @@ if hoy in calendario_sorpresas:
               st.session_state["contador_no"] += 1
               st.rerun()
 
-      # 3. FASE DE LA BATALLA POKÉMON (OPCIONAL)
+      # 3. FASE DE LA BATALLA POKÉMON DIFÍCIL Y CON CONTRAATAQUE
       elif st.session_state["fase_31"] == "batalla_pokemon":
-        # Reproductor de música de batalla Pokémon
         try:
           st.audio(regalo["musica_batalla"], autoplay=True, loop=True)
         except Exception:
           pass
 
-        st.markdown("## COMBATE POKÉMON INICIAL")
+        st.markdown("## COMBATE POKÉMON DIFÍCIL")
         st.write(
-            f"¡Un **{regalo['pokemon_rival']}** salvaje apareció y quiere robar"
-            " tu atención!"
+            f"¡Un **{regalo['pokemon_rival']}** salvaje muy fuerte apareció!"
         )
 
         hp_r = st.session_state["hp_rival"]
@@ -407,10 +407,8 @@ if hoy in calendario_sorpresas:
           st.markdown(f"**Tu equipo: {regalo['pokemon_jugador']} (Lv. 50)**")
           st.text(f"HP: {hp_u}%")
         with col_sprite_u:
-          st.image(
-              f"https://play.pokemonshowdown.com/sprites/gen5back/{regalo['pokemon_jugador'].lower()}.png",
-              width=120,
-          )
+          # Sprite de Pikachu garantizado correctamente
+          st.image(regalo["sprite_jugador"], width=120)
 
         st.markdown("---")
         st.write("### Elige tu movimiento:")
@@ -418,19 +416,43 @@ if hoy in calendario_sorpresas:
         col_atq1, col_atq2 = st.columns(2)
         with col_atq1:
           if st.button("Impactrueno de Amor"):
-            st.session_state["hp_rival"] -= 40
-            if st.session_state["hp_rival"] <= 0:
+            st.session_state["hp_rival"] -= 25  # Quita vida al rival
+            st.session_state["hp_usuario"] -= (
+                20  # El rival contraataca y te quita vida
+            )
+
+            if st.session_state["hp_usuario"] <= 0:
+              st.session_state["fase_31"] = "derrota"
+            elif st.session_state["hp_rival"] <= 0:
               st.session_state["fase_31"] = "victoria"
             st.rerun()
 
         with col_atq2:
           if st.button("Beso tierno con Boost"):
-            st.session_state["hp_rival"] -= 60
-            if st.session_state["hp_rival"] <= 0:
+            st.session_state["hp_rival"] -= 35  # Quita vida al rival
+            st.session_state["hp_usuario"] -= (
+                20  # El rival contraataca y te quita vida
+            )
+
+            if st.session_state["hp_usuario"] <= 0:
+              st.session_state["fase_31"] = "derrota"
+            elif st.session_state["hp_rival"] <= 0:
               st.session_state["fase_31"] = "victoria"
             st.rerun()
 
-      # 4. FASE DE VICTORIA EN LA BATALLA
+      # 4. FASE DE DERROTA EN LA BATALLA
+      elif st.session_state["fase_31"] == "derrota":
+        st.error(
+            f"¡Tu {regalo['pokemon_jugador']} se quedó sin energía contra"
+            f" {regalo['pokemon_rival']}!"
+        )
+        if st.button("Reintentar Combate"):
+          st.session_state["hp_rival"] = 100
+          st.session_state["hp_usuario"] = 100
+          st.session_state["fase_31"] = "batalla_pokemon"
+          st.rerun()
+
+      # 5. FASE DE VICTORIA EN LA BATALLA
       elif st.session_state["fase_31"] == "victoria":
         st.balloons()
         st.markdown(
@@ -439,7 +461,7 @@ if hoy in calendario_sorpresas:
         )
         st.success(
             f"¡{regalo['pokemon_jugador']} derrotó a {regalo['pokemon_rival']} con"
-            " éxito!"
+            " éxito tras una dura batalla!"
         )
         st.markdown("---")
         st.markdown("### ¡PREMIO DESBLOQUEADO!")
