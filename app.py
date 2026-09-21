@@ -198,6 +198,8 @@ calendario_sorpresas = {
         ),
         "pregunta": (
             "Después de todo este tiempo (242 dias) ... ¿Puedo ser tu novio?"
+            # Cambiado a "novia" para el rol correcto
+            .replace("ser tu novio", "ser mi novia")
         ),
         "frases_no": [
             "No",
@@ -209,7 +211,7 @@ calendario_sorpresas = {
             "¡El botón de al lado es mejor!",
         ],
         "musica_romantica": "musica_romantica.mp3",
-        "musica_triste": "musica_triste.mp3",  # Canción triste al agotar los No
+        "musica_triste": "musica_triste.mp3",
         "musica_batalla": "musica_pokemon.mp3",
         "pokemon_jugador": "Pikachu",
         "sprite_jugador": (
@@ -377,8 +379,9 @@ if hoy in calendario_sorpresas:
 
         if st.session_state["fase_31"] == "exito_aceptado":
           st.success(
-              "¡Has aceptado ser mi novio! Tu respuesta ya ha sido guardada"
-              " con éxito."
+              "¡Has aceptado ser mi novia! Gracias por ser mi novia y hacer"
+              " mi vida mucho más feliz. Tu respuesta ya ha sido guardada con"
+              " éxito."
           )
           st.write(
               "¿Quieres pasar el rato y jugar una batalla Pokémon de bonificación"
@@ -421,14 +424,13 @@ if hoy in calendario_sorpresas:
           with col1:
             if st.button("¡SÍ, QUIERO!"):
               guardar_preferencia_formato(
-                  "Aceptó ser mi novio", "31 de Octubre"
+                  "Aceptó ser mi novia", "31 de Octubre"
               )
               st.session_state["fase_31"] = "exito_aceptado"
               st.rerun()
 
           with col2:
             if st.button(texto_actual_no, key="btn_rechazo"):
-              # Validar si es el último botón de "No" de la lista
               if indice_actual >= len(frases_no) - 1:
                 guardar_preferencia_formato(
                     "Dijo que NO hasta el final", "31 de Octubre"
@@ -568,8 +570,8 @@ if hoy in calendario_sorpresas:
 
         st.markdown("---")
         st.write(
-            "¡Muchas gracias por aceptar ser mi novio! Eres lo mejor de mi"
-            " mundo."
+            "¡Muchas gracias por aceptar ser mi novia! Gracias por ser mi"
+            " novia y estar conmigo, eres lo mejor de mi mundo."
         )
 
     else:
