@@ -197,8 +197,7 @@ calendario_sorpresas = {
             "<b>— Con amor, Cristóbal</b>"
         ),
         "pregunta": (
-            "Después de todo este tiempo (242 dias) ... ¿Puedo ser tu novio?"
-            # Cambiado a "novia" para el rol correcto
+            "Después de todo este tiempo (242 dias) ... ¿Puedo ser tu novia?"
         ),
         "frases_no": [
             "No",
@@ -601,6 +600,38 @@ if hoy in calendario_sorpresas:
     st.markdown("</div>", unsafe_allow_html=True)
 
 else:
+  # ZONA DE ESPERA CON LA OPCIÓN 3 (FRASES ALEATORIAS)
+  frases_espera = [
+      (
+          " Pista secreta: La paciencia tiene su recompensa... y la próxima"
+          " sorpresa te va a encantar >w<."
+      ),
+      " ¿Sabías que? Cada día a tu lado es mi parte favorita de la semana si bien me gustan los dias libres me gustas mas tu.",
+      (
+          " Recuerda que eres lo más lindo que tengo. ¡Vuelve pronto para más"
+          " sorpresas cariño!"
+      ),
+      (
+          " Mini-reto del día: Sonríe, porque alguien en este mundo piensa"
+          " mucho en ti."
+      ),
+      (
+          " Consejo del día: La vida es mejor contigo. ¡No olvides que eres la mujer que amo!"
+          "  ¡Asi que mantente atenta po otra sorpresa!"
+      ),
+      (
+          " Curiosidad: Cada vez que pienso en ti, mi corazón late más rápido."
+          " ¡Me encantas!"
+      ),
+      (
+          " Mensaje secreto: Aunque hoy no haya sorpresas, cada día contigo"
+          " es una fantasía."
+      ),
+      (
+          " Recordatorio: Eres especial y única. ¡No olvides sonreír hoy!"
+      ),
+  ]
+
   with st.container():
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("Zona de espera")
@@ -608,6 +639,14 @@ else:
         "Hoy es un día tranquilo y no hay cajas fuertes abiertas. Vuelve en"
         " otra fecha especial para descubrir nuevas sorpresas."
     )
+
+    st.markdown("---")
+    st.write("### ¿Aburrida? Prueba esto:")
+
+    if st.button(" Dame un mensaje para hoy"):
+      mensaje_aleatorio = random.choice(frases_espera)
+      st.info(mensaje_aleatorio)
+
     st.markdown("</div>", unsafe_allow_html=True)
 
 # --- SECCIÓN INTERACTIVA: BUZÓN DE SECRETOS ---
