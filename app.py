@@ -46,18 +46,16 @@ st.markdown(
         left: 50%;
         transform: translate(-50%, -50%);
         width: 480px;
-        opacity: 0.07; /* Muy sutil de fondo */
+        opacity: 0.07;
         z-index: 0;
         pointer-events: none;
     }}
 
-    /* Asegurar que el contenido esté por encima del fondo */
     .block-container {{
         position: relative;
         z-index: 1;
     }}
 
-    /* Estilo para las tarjetas de contenido estilo gamer/oscuro */
     .card {{
         background-color: rgba(22, 22, 22, 0.95);
         padding: 25px;
@@ -67,14 +65,12 @@ st.markdown(
         margin-bottom: 20px;
     }}
     
-    /* Títulos con estilo retro/pixel */
     h1, h3 {{
         color: #ff5252;
         font-family: 'Courier New', monospace;
         text-align: center;
     }}
     
-    /* Estilo de los botones */
     .stButton>button {{
         background: linear-gradient(90deg, #ff5252 0%, #c62828 100%);
         color: white;
@@ -90,7 +86,7 @@ st.markdown(
         color: white;
     }}
 
-    /* Animación de corazones flotantes de fondo */
+    /* Animación de corazones flotantes normales */
     @keyframes flotar {{
         0% {{ transform: translateY(0vh) scale(0.8); opacity: 0; }}
         50% {{ opacity: 0.7; }}
@@ -108,10 +104,9 @@ st.markdown(
     }}
     </style>
 
-    <!-- Gato gigante de fondo -->
     <img src="{src_gato}" class="gato-background">
 
-    <!-- Corazones flotantes -->
+    <!-- Corazones flotantes de fondo base -->
     <img src="{src_heart}" class="corazon-pixel" style="left: 10%; animation-duration: 5s;">
     <img src="{src_heart}" class="corazon-pixel" style="left: 30%; animation-duration: 7s; animation-delay: 1.5s;">
     <img src="{src_heart}" class="corazon-pixel" style="left: 60%; animation-duration: 6s; animation-delay: 2.5s;">
@@ -121,9 +116,8 @@ st.markdown(
 )
 
 
-# --- FUNCIÓN PARA GUARDAR RESPUESTAS EN FORMATO SOLICITADO ---
+# --- FUNCIÓN PARA GUARDAR RESPUESTAS ---
 def guardar_preferencia_formato(sorpresa, dia_elegido):
-  # Formato: "sorpresa que quiere"; "dia elegido"
   registro = f'"{sorpresa}"; "{dia_elegido}"\n'
   with open("registro_sorpresas.csv", "a", encoding="utf-8") as f:
     f.write(registro)
@@ -133,14 +127,19 @@ def guardar_preferencia_formato(sorpresa, dia_elegido):
 hoy = datetime.now().strftime("%d-%m")
 fecha_larga = datetime.now().strftime("%d/%m/%Y")
 
+# ==============================================================================
+# AQUÍ PUEDES PERSONALIZAR LAS FECHAS, CONTRASEÑAS, POEMAS Y MENSAJES A TU GUSTO
+# ==============================================================================
 calendario_sorpresas = {
     "14-02": {
+        "tipo": "normal",
         "titulo": "San Valentín",
         "password": "tu_contraseña_aqui",
         "mensaje": "Escribe aquí tu mensaje personalizado para esta fecha.",
         "video": "video_san_valentin.mp4",
     },
     "21-09": {
+        "tipo": "normal",
         "titulo": "Día de las Flores Amarillas",
         "password": "Te_Amo",
         "mensaje": (
@@ -149,6 +148,30 @@ calendario_sorpresas = {
             " espero que te guste y que la disfrutes mucho. Con amor, Cristóbal."
         ),
         "video": "video_flores_amarillas.mp4",
+    },
+    "31-10": {
+        "tipo": "pareja",
+        "titulo": "???",
+        "password": "???",  # Cambia por la clave secreta de ese día
+        "poema": (
+            '"Entre risas, miradas y casualidades,<br>'
+            "llegaste a mi vida a cambiar las verdades.<br>"
+            "Eres la magia de cada rincón,<br>"
+            'y el dueño absoluto de este corazón."<br><br>'
+            "<b>— Con amor, Cristóbal</b>"
+        ),
+        "pregunta": (
+            "Después de todo este tiempo... ¿Quieres ser mi pareja? ❤️"
+        ),
+        "frases_no": [
+            "No",
+            "¿Segura?",
+            "Piénsalo bien...",
+            "¡Dale al otro botón!",
+            "Te vas a arrepentir :O",
+            "Imposible aceptar esto",
+            "¡El botón de al lado es mejor!",
+        ],
     },
 }
 
@@ -166,29 +189,140 @@ if hoy in calendario_sorpresas:
   with st.container():
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader(regalo["titulo"])
-    st.write(
-        "Hay una sorpresa bloqueada para hoy. Introduce la contraseña secreta"
-        " para abrirla."
-    )
 
-    clave_ingresada = st.text_input("Ingresa la contraseña:", type="password")
+    # SI ES LA FECHA ESPECIAL DE PAREJA (31 DE OCTUBRE)
+    if regalo.get("tipo") == "pareja":
+      st.write(
+          "Hay una caja misteriosa bloqueada para hoy. Introduce la contraseña"
+          " secreta para descubrir lo que hay dentro..."
+      )
+      clave_ingresada = st.text_input("Ingresa la contraseña:", type="password")
 
-    if st.button("Desbloquear sorpresa"):
-      if clave_ingresada == regalo["password"]:
-        st.success("Contraseña correcta. Desbloqueando regalo...")
+      if st.button("Desbloquear sorpresa"):
+        if clave_ingresada == regalo["password"]:
+          st.session_state["acceso_31_10"] = True
+        else:
+          st.error("Contraseña incorrecta. ¡Inténtalo de nuevo!")
+
+      if st.session_state.get("acceso_31_10", False):
+        st.success("✨ ¡Contraseña correcta! Desbloqueando momento especial...")
         st.balloons()
-        st.write(regalo["mensaje"])
-        try:
-          st.video(regalo["video"])
-        except Exception:
-          st.warning(
-              "No se encontró el archivo de video. Asegúrate de subirlo a"
-              " GitHub con el mismo nombre."
-          )
-      elif clave_ingresada == "":
-        st.warning("Por favor, introduce una contraseña.")
-      else:
-        st.error("Contraseña incorrecta. Inténtalo de nuevo.")
+
+        st.markdown("---")
+        st.markdown("### ⏳ Una pequeña cuenta regresiva hacia tu corazón...")
+        st.info(
+            "Cada segundo que pasa desde que nos conocimos ha valido la pena"
+            " por completo..."
+        )
+
+        st.markdown("---")
+        st.markdown("### 📜 Para ti, con todo mi amor:")
+        st.markdown(
+            f"""
+            <div style='text-align: center; font-style: italic; color: #ff8a80; font-size: 18px; line-height: 1.6;'>
+                {regalo["poema"]}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown("---")
+        st.markdown("La Pregunta Más Importante...")
+        st.write(regalo["pregunta"])
+
+        if "contador_no" not in st.session_state:
+          st.session_state["contador_no"] = 0
+
+        frases_no = regalo["frases_no"]
+        texto_actual_no = frases_no[
+            min(
+                st.session_state["contador_no"], len(frases_no) - 1
+            )
+        ]
+
+        ancho_si = min(3 + st.session_state["contador_no"], 5)
+        ancho_no = max(3 - (st.session_state["contador_no"] // 2), 1)
+
+        col1, col2 = st.columns([ancho_si, ancho_no])
+
+        with col1:
+          if st.button(
+              f"¡SÍ, QUIERO! {' ' * st.session_state['contador_no']}"
+          ):
+            st.markdown(
+                """
+                <style>
+                @keyframes lluvia {
+                    0% { transform: translateY(-10vh) scale(1); opacity: 1; }
+                    100% { transform: translateY(110vh) scale(1.5); opacity: 0; }
+                }
+                .corazon-extra {
+                    position: fixed;
+                    top: -10vh;
+                    width: 35px;
+                    height: 35px;
+                    animation: lluvia 3s infinite linear;
+                    z-index: 9999;
+                }
+                </style>
+                <img src="data:image/png;base64,"""
+                + heart_base64
+                + """" class="corazon-extra" style="left: 15%; animation-delay: 0.1s;">
+                <img src="data:image/png;base64,"""
+                + heart_base64
+                + """" class="corazon-extra" style="left: 35%; animation-delay: 0.5s;">
+                <img src="data:image/png;base64,"""
+                + heart_base64
+                + """" class="corazon-extra" style="left: 55%; animation-delay: 0.2s;">
+                <img src="data:image/png;base64,"""
+                + heart_base64
+                + """" class="corazon-extra" style="left: 75%; animation-delay: 0.8s;">
+                <img src="data:image/png;base64,"""
+                + heart_base64
+                + """" class="corazon-extra" style="left: 90%; animation-delay: 0.4s;">
+            """,
+                unsafe_allow_html=True,
+            )
+
+            st.balloons()
+            st.success(
+                "¡Yupieee! Me encantas. Te amo"
+                " muchísimo."
+            )
+            guardar_preferencia_formato(
+                "Aceptó ser mi pareja ❤️", "31 de Octubre"
+            )
+
+        with col2:
+          if st.button(texto_actual_no, key="btn_rechazo"):
+            st.session_state["contador_no"] += 1
+            st.rerun()
+
+    else:
+      # DÍAS NORMALES
+      st.write(
+          "Hay una sorpresa bloqueada para hoy. Introduce la contraseña secreta"
+          " para abrirla."
+      )
+      clave_ingresada = st.text_input("Ingresa la contraseña:", type="password")
+
+      if st.button("Desbloquear sorpresa"):
+        if clave_ingresada == regalo["password"]:
+          st.success("Contraseña correcta. Desbloqueando regalo...")
+          st.balloons()
+          st.write(regalo["mensaje"])
+          try:
+            st.video(regalo["video"])
+          except Exception:
+            st.warning(
+                "No se encontró el archivo de video. Asegúrate de subirlo a"
+                " GitHub con el mismo nombre."
+            )
+        elif clave_ingresada == "":
+          st.warning("Por favor, introduce una contraseña.")
+        else:
+          st.error("Contraseña incorrecta. Inténtalo de nuevo.")
+
     st.markdown("</div>", unsafe_allow_html=True)
 
 else:
@@ -236,7 +370,6 @@ with st.expander(" Panel de creador (Oculto)"):
       "Clave de administrador:", type="password", key="admin_pass"
   )
 
-  # Cambia 'cristobal123' por la contraseña que tú prefieras
   if pass_admin == "cristobal123":
     st.success("¡Acceso concedido!")
 
