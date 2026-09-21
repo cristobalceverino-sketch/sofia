@@ -102,6 +102,14 @@ st.markdown(
         z-index: 1;
         user-select: none;
     }}
+
+    .arena-pokemon {{
+        background: #111;
+        border: 3px solid #ff5252;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+    }}
     </style>
 
     <img src="{src_gato}" class="gato-background">
@@ -123,12 +131,12 @@ def guardar_preferencia_formato(sorpresa, dia_elegido):
     f.write(registro)
 
 
-# --- VERIFICACIÓN DE FECHA ---
-hoy = datetime.now().strftime("%d-%m")
+# --- VERIFICACIÓN DE FECHA REAL ---
+fecha_real = datetime.now().strftime("%d-%m")
 fecha_larga = datetime.now().strftime("%d/%m/%Y")
 
 # ==============================================================================
-# AQUÍ PUEDES PERSONALIZAR LAS FECHAS, CONTRASEÑAS, POEMAS Y MENSAJES A TU GUSTO
+# CALENDARIO DE SORPRESAS
 # ==============================================================================
 calendario_sorpresas = {
     "14-02": {
@@ -152,7 +160,7 @@ calendario_sorpresas = {
     "31-10": {
         "tipo": "pareja",
         "titulo": "???",
-        "password": "tu_contraseña_aqui",  # Cambia por la clave secreta de ese día
+        "password": "tu_contraseña_aqui",
         "poema": (
             '"Entre risas, miradas y casualidades,<br>'
             "llegaste a mi vida a cambiar las verdades.<br>"
@@ -161,7 +169,7 @@ calendario_sorpresas = {
             "<b>— Con amor, Cristóbal</b>"
         ),
         "pregunta": (
-            "Después de todo este tiempo... ¿Quieres ser mi pareja? ❤️"
+            "Después de todo este tiempo... ¿Quieres ser mi pareja?"
         ),
         "frases_no": [
             "No",
@@ -172,13 +180,93 @@ calendario_sorpresas = {
             "Imposible aceptar esto",
             "¡El botón de al lado es mejor!",
         ],
+        "musica_romantica": "musica_romantica.mp3",  # Sube este archivo a GitHub
+        "musica_batalla": "musica_pokemon.mp3",  # Sube este archivo a GitHub
+        "pokemon_jugador": "Pikachu",
+        "sprite_jugador": "https://play.pokemonshowdown.com/sprites/gen5/pikachu.png",
+        "pokemon_rival": "Sylveon",
+        "sprite_rival": "https://play.pokemonshowdown.com/sprites/gen5/sylveon.png",
+        "pokemon_premio": (
+            "¡Has ganado la batalla y tu premio secreto! Una cita especial o"
+            " regalito por desbloquear mi corazón."
+        ),
     },
 }
 
 # --- INTERFAZ VISUAL PRINCIPAL ---
 st.markdown("<h1>Caja Fuerte</h1>", unsafe_allow_html=True)
+
+# ==============================================================================
+# PANEL OCULTO PARA EL CREADOR (ADMINISTRADOR)
+# ==============================================================================
+with st.expander("Panel de creador (Oculto)"):
+  pass_admin = st.text_input(
+      "Clave de administrador:", type="password", key="admin_pass"
+  )
+
+  if pass_admin == "cristobal123":
+    st.success("¡Acceso concedido!")
+
+    st.markdown("---")
+    st.subheader("Herramientas de Prueba")
+
+    modo_prueba = st.selectbox(
+        "Selecciona qué fecha quieres probar:",
+        [
+            "Fecha real (Automática)",
+            "14-02 (San Valentín)",
+            "21-09 (Flores Amarillas)",
+            "31-10 (Pregunta de Pareja)",
+            "Día sin sorpresas (Zona de espera)",
+        ],
+    )
+
+    if modo_prueba == "14-02 (San Valentín)":
+      hoy = "14-02"
+    elif modo_prueba == "21-09 (Flores Amarillas)":
+      hoy = "21-09"
+    elif modo_prueba == "31-10 (Pregunta de Pareja)":
+      hoy = "31-10"
+    elif modo_prueba == "Día sin sorpresas (Zona de espera)":
+      hoy = "00-00"
+    else:
+      hoy = fecha_real
+
+    st.markdown("---")
+    st.subheader("Gestión de Respuestas")
+
+    if os.path.exists("registro_sorpresas.csv"):
+      with open("registro_sorpresas.csv", "r", encoding="utf-8") as f:
+        contenido = f.read()
+
+      if contenido.strip():
+        st.write("### Respuestas registradas hasta ahora:")
+        st.code(contenido, language="text")
+
+        with open("registro_sorpresas.csv", "rb") as archivo_csv:
+          st.download_button(
+              label="Descargar archivo CSV para Drive",
+              data=archivo_csv,
+              file_name="registro_sorpresas.csv",
+              mime="text/csv",
+          )
+
+        if st.button("🗑️ Borrar todas las respuestas registradas"):
+          with open("registro_sorpresas.csv", "w", encoding="utf-8") as f:
+            f.write("")
+          st.success("¡El archivo de respuestas ha sido limpiado con éxito!")
+          st.rerun()
+      else:
+        st.info("El archivo está vacío, no hay respuestas guardadas.")
+    else:
+      st.warning("Aún no se ha creado el archivo de registro.")
+  else:
+    hoy = fecha_real
+    if pass_admin != "":
+      st.error("Contraseña incorrecta.")
+
 st.markdown(
-    f"<p style='text-align: center; color: #888;'>Fecha actual: {fecha_larga}</p>",
+    f"<p style='text-align: center; color: #888;'>Fecha actual simulada: {hoy}</p>",
     unsafe_allow_html=True,
 )
 
@@ -192,31 +280,43 @@ if hoy in calendario_sorpresas:
 
     # SI ES LA FECHA ESPECIAL DE PAREJA (31 DE OCTUBRE)
     if regalo.get("tipo") == "pareja":
-      st.write(
-          "Hay una caja misteriosa bloqueada para hoy. Introduce la contraseña"
-          " secreta para descubrir lo que hay dentro..."
-      )
-      clave_ingresada = st.text_input("Ingresa la contraseña:", type="password")
+      if "fase_31" not in st.session_state:
+        st.session_state["fase_31"] = "bloqueado"
 
-      if st.button("Desbloquear sorpresa"):
-        if clave_ingresada == regalo["password"]:
-          st.session_state["acceso_31_10"] = True
-        else:
-          st.error("Contraseña incorrecta. ¡Inténtalo de nuevo!")
+      # 1. FASE DE CONTRASEÑA
+      if st.session_state["fase_31"] == "bloqueado":
+        st.write(
+            "Hay una caja misteriosa bloqueada para hoy. Introduce la contraseña"
+            " secreta para descubrir lo que hay dentro..."
+        )
+        clave_ingresada = st.text_input("Ingresa la contraseña:", type="password")
 
-      if st.session_state.get("acceso_31_10", False):
-        st.success("✨ ¡Contraseña correcta! Desbloqueando momento especial...")
-        st.balloons()
+        if st.button("Desbloquear sorpresa"):
+          if clave_ingresada == regalo["password"]:
+            st.session_state["fase_31"] = "poema"
+            st.rerun()
+          else:
+            st.error("Contraseña incorrecta. ¡Inténtalo de nuevo!")
+
+      # 2. FASE DEL POEMA Y PREGUNTA
+      elif st.session_state["fase_31"] in ["poema", "exito_aceptado"]:
+        # Reproductor de música romántica de fondo
+        try:
+          st.audio(regalo["musica_romantica"], autoplay=True, loop=True)
+        except Exception:
+          pass
+
+        st.success("¡Contraseña correcta! Desbloqueando momento especial...")
 
         st.markdown("---")
-        st.markdown("### ⏳ Una pequeña cuenta regresiva hacia tu corazón...")
+        st.markdown("### Una pequeña cuenta regresiva hacia tu corazón...")
         st.info(
             "Cada segundo que pasa desde que nos conocimos ha valido la pena"
             " por completo..."
         )
 
         st.markdown("---")
-        st.markdown("### 📜 Para ti, con todo mi amor:")
+        st.markdown("### Para ti, con todo mi amor:")
         st.markdown(
             f"""
             <div style='text-align: center; font-style: italic; color: #ff8a80; font-size: 18px; line-height: 1.6;'>
@@ -227,72 +327,127 @@ if hoy in calendario_sorpresas:
         )
 
         st.markdown("---")
-        st.markdown("### ❤️ La Pregunta Más Importante...")
+        st.markdown("### La Pregunta Más Importante...")
         st.write(regalo["pregunta"])
 
-        if "contador_no" not in st.session_state:
-          st.session_state["contador_no"] = 0
-
-        frases_no = regalo["frases_no"]
-        texto_actual_no = frases_no[
-            min(
-                st.session_state["contador_no"], len(frases_no) - 1
-            )
-        ]
-
-        # Hacemos que el botón 'Sí' crezca mucho más rápido con cada intento en el 'No'
-        ancho_si = min(2 + (st.session_state["contador_no"] * 2), 10)
-        ancho_no = max(4 - st.session_state["contador_no"], 1)
-
-        col1, col2 = st.columns([ancho_si, ancho_no])
-
-        with col1:
-          if st.button("¡SÍ, QUIERO! ❤️"):
-            st.markdown(
-                """
-                <style>
-                @keyframes lluvia {
-                    0% { transform: translateY(-10vh) scale(1); opacity: 1; }
-                    100% { transform: translateY(110vh) scale(1.5); opacity: 0; }
-                }
-                .corazon-extra {
-                    position: fixed;
-                    top: -10vh;
-                    width: 35px;
-                    height: 35px;
-                    animation: lluvia 3s infinite linear;
-                    z-index: 9999;
-                }
-                </style>
-                <img src="data:image/png;base64,"""
-                + heart_base64
-                + """" class="corazon-extra" style="left: 15%; animation-delay: 0.1s;">
-                <img src="data:image/png;base64,"""
-                + heart_base64
-                + """" class="corazon-extra" style="left: 35%; animation-delay: 0.5s;">
-                <img src="data:image/png;base64,"""
-                + heart_base64
-                + """" class="corazon-extra" style="left: 55%; animation-delay: 0.2s;">
-                <img src="data:image/png;base64,"""
-                + heart_base64
-                + """" class="corazon-extra" style="left: 75%; animation-delay: 0.8s;">
-                <img src="data:image/png;base64,"""
-                + heart_base64
-                + """" class="corazon-extra" style="left: 90%; animation-delay: 0.4s;">
-            """,
-                unsafe_allow_html=True,
-            )
-
-            st.balloons()
-            st.success("¡Yupieee! Me encantas. Te amo muchísimo.")
-            guardar_preferencia_formato(
-                "Aceptó ser mi pareja ❤️", "31 de Octubre"
-            )
-
-        with col2:
-          if st.button(texto_actual_no, key="btn_rechazo"):
-            st.session_state["contador_no"] += 1
+        # Si ya aceptó previamente, mostramos directamente el mensaje de éxito y la opción opcional de la batalla
+        if st.session_state["fase_31"] == "exito_aceptado":
+          st.success(
+              "¡Has aceptado ser mi pareja! Tu respuesta ya ha sido guardada"
+              " con éxito."
+          )
+          st.write(
+              "¿Quieres pasar el rato y jugar una batalla Pokémon de bonificación"
+              "?"
+          )
+          if st.button("¡Iniciar Combate Pokémon!"):
+            st.session_state["fase_31"] = "batalla_pokemon"
+            st.session_state["hp_rival"] = 100
+            st.session_state["hp_usuario"] = 100
             st.rerun()
+        else:
+          if "contador_no" not in st.session_state:
+            st.session_state["contador_no"] = 0
+
+          frases_no = regalo["frases_no"]
+          texto_actual_no = frases_no[
+              min(
+                  st.session_state["contador_no"], len(frases_no) - 1
+              )
+          ]
+
+          ancho_si = min(2 + (st.session_state["contador_no"] * 2), 10)
+          ancho_no = max(4 - st.session_state["contador_no"], 1)
+
+          col1, col2 = st.columns([ancho_si, ancho_no])
+
+          with col1:
+            if st.button("¡SÍ, QUIERO!"):
+              # GUARDADO INMEDIATO Y SEGURO DE LA RESPUESTA
+              guardar_preferencia_formato(
+                  "Aceptó ser mi pareja", "31 de Octubre"
+              )
+              # Cambiamos a estado de éxito sin forzar la batalla
+              st.session_state["fase_31"] = "exito_aceptado"
+              st.rerun()
+
+          with col2:
+            if st.button(texto_actual_no, key="btn_rechazo"):
+              st.session_state["contador_no"] += 1
+              st.rerun()
+
+      # 3. FASE DE LA BATALLA POKÉMON (OPCIONAL)
+      elif st.session_state["fase_31"] == "batalla_pokemon":
+        # Reproductor de música de batalla Pokémon
+        try:
+          st.audio(regalo["musica_batalla"], autoplay=True, loop=True)
+        except Exception:
+          pass
+
+        st.markdown("## COMBATE POKÉMON INICIAL")
+        st.write(
+            f"¡Un **{regalo['pokemon_rival']}** salvaje apareció y quiere robar"
+            " tu atención!"
+        )
+
+        hp_r = st.session_state["hp_rival"]
+        hp_u = st.session_state["hp_usuario"]
+
+        col_sprite_r, col_info_r = st.columns([1, 2])
+        with col_sprite_r:
+          st.image(regalo["sprite_rival"], width=120)
+        with col_info_r:
+          st.markdown(f"**Rival: {regalo['pokemon_rival']} (Lv. 50)**")
+          st.text(f"HP: {hp_r}%")
+
+        st.markdown("---")
+
+        col_info_u, col_sprite_u = st.columns([2, 1])
+        with col_info_u:
+          st.markdown(f"**Tu equipo: {regalo['pokemon_jugador']} (Lv. 50)**")
+          st.text(f"HP: {hp_u}%")
+        with col_sprite_u:
+          st.image(
+              f"https://play.pokemonshowdown.com/sprites/gen5back/{regalo['pokemon_jugador'].lower()}.png",
+              width=120,
+          )
+
+        st.markdown("---")
+        st.write("### Elige tu movimiento:")
+
+        col_atq1, col_atq2 = st.columns(2)
+        with col_atq1:
+          if st.button("Impactrueno de Amor"):
+            st.session_state["hp_rival"] -= 40
+            if st.session_state["hp_rival"] <= 0:
+              st.session_state["fase_31"] = "victoria"
+            st.rerun()
+
+        with col_atq2:
+          if st.button("Beso tierno con Boost"):
+            st.session_state["hp_rival"] -= 60
+            if st.session_state["hp_rival"] <= 0:
+              st.session_state["fase_31"] = "victoria"
+            st.rerun()
+
+      # 4. FASE DE VICTORIA EN LA BATALLA
+      elif st.session_state["fase_31"] == "victoria":
+        st.balloons()
+        st.markdown(
+            f"<h2 style='text-align: center; color: #ff5252;'>¡VICTORIA!</h2>",
+            unsafe_allow_html=True,
+        )
+        st.success(
+            f"¡{regalo['pokemon_jugador']} derrotó a {regalo['pokemon_rival']} con"
+            " éxito!"
+        )
+        st.markdown("---")
+        st.markdown("### ¡PREMIO DESBLOQUEADO!")
+        st.info(regalo["pokemon_premio"])
+        st.write(
+            "¡Muchas gracias por aceptar ser mi pareja! Eres lo mejor de mi"
+            " mundo."
+        )
 
     else:
       # DÍAS NORMALES
@@ -352,47 +507,8 @@ with st.container():
   if st.button("Guardar mi respuesta", key="btn_guardar_secreto"):
     if gusto_input:
       guardar_preferencia_formato(gusto_input, opcion_preferida)
-      st.success("¡Guardado con éxito! ❤️")
+      st.success("¡Guardado con éxito!")
     else:
       st.warning("Por favor escribe algo antes de guardar.")
 
   st.markdown("</div>", unsafe_allow_html=True)
-
-# ==============================================================================
-# PANEL OCULTO PARA EL CREADOR (REVISAR Y DESCARGAR RESPUESTAS)
-# ==============================================================================
-with st.expander(" Panel de creador (Oculto)"):
-  pass_admin = st.text_input(
-      "Clave de administrador:", type="password", key="admin_pass"
-  )
-
-  if pass_admin == "cristobal123":
-    st.success("¡Acceso concedido!")
-
-    if os.path.exists("registro_sorpresas.csv"):
-      with open("registro_sorpresas.csv", "r", encoding="utf-8") as f:
-        contenido = f.read()
-
-      if contenido.strip():
-        st.write("### Respuestas registradas hasta ahora:")
-        st.code(contenido, language="text")
-
-        with open("registro_sorpresas.csv", "rb") as archivo_csv:
-          st.download_button(
-              label=" Descargar archivo CSV para Drive",
-              data=archivo_csv,
-              file_name="registro_sorpresas.csv",
-              mime="text/csv",
-          )
-      else:
-        st.info(
-            "El archivo está vacío, aún no hay respuestas guardadas por este"
-            " medio."
-        )
-    else:
-      st.warning(
-          "Aún no se ha creado el archivo de registro (nadie ha enviado nada"
-          " todavía)."
-      )
-  elif pass_admin != "":
-    st.error("Contraseña incorrecta.")
