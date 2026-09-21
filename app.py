@@ -350,7 +350,7 @@ with st.container():
   )
   opcion_preferida = st.selectbox(
       "Elige el día u ocasión preferida:",
-      ["Navidad", "Año Nuevo", "San Valentín", "Cumpleaños", "Aniversario"],
+      ["Navidad", "Año Nuevo", "San Valentín", "Cumpleaños"],
   )
 
   if st.button("Guardar mi respuesta", key="btn_guardar_secreto"):
@@ -383,7 +383,7 @@ with st.expander(" Panel de creador (Oculto)"):
 
         with open("registro_sorpresas.csv", "rb") as archivo_csv:
           st.download_button(
-              label="📥 Descargar archivo CSV para Drive",
+              label=" Descargar archivo CSV para Drive",
               data=archivo_csv,
               file_name="registro_sorpresas.csv",
               mime="text/csv",
