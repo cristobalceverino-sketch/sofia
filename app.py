@@ -185,6 +185,13 @@ calendario_sorpresas = {
         ),
         "video": "video_flores_amarillas.mp4",
     },
+    # --- NUEVA FECHA: ANIVERSARIO POKÉMON ---
+    "27-02": {
+        "tipo": "emulador_pokemon",
+        "titulo": "Aniversario Pokémon",
+        "password": "pokemon",
+        "mensaje": "¡Has desbloqueado el emulador exclusivo de batallas Pokémon! Prepárate para la aventura.",
+    },
     "31-10": {
         "tipo": "pareja",
         "titulo": "???",
@@ -252,6 +259,7 @@ with st.expander("Panel de creador (Oculto)"):
             "Fecha real (Automática)",
             "14-02 (San Valentín)",
             "21-09 (Flores Amarillas)",
+            "27-02 (Aniversario Pokémon - Emulador)",
             "31-10 (Pregunta de Pareja)",
             "Día sin sorpresas (Zona de espera)",
         ],
@@ -261,6 +269,8 @@ with st.expander("Panel de creador (Oculto)"):
       hoy = "14-02"
     elif modo_prueba == "21-09 (Flores Amarillas)":
       hoy = "21-09"
+    elif modo_prueba == "27-02 (Aniversario Pokémon - Emulador)":
+      hoy = "27-02"
     elif modo_prueba == "31-10 (Pregunta de Pareja)":
       hoy = "31-10"
     elif modo_prueba == "Día sin sorpresas (Zona de espera)":
@@ -314,8 +324,49 @@ if hoy in calendario_sorpresas:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader(regalo["titulo"])
 
+    # --- SI ES LA FECHA ESPECIAL DEL EMULADOR POKÉMON (27 DE FEBRERO) ---
+    if regalo.get("tipo") == "emulador_pokemon":
+      if "fase_27" not in st.session_state:
+        st.session_state["fase_27"] = "bloqueado"
+
+      if st.session_state["fase_27"] == "bloqueado":
+        st.write(
+            "Hay una caja misteriosa del **Aniversario Pokémon** bloqueada para hoy."
+            " Introduce la contraseña secreta (`pokemon`) para abrirla..."
+        )
+        clave_ingresada = st.text_input("Ingresa la contraseña:", type="password", key="pass_27")
+
+        if st.button("Desbloquear Emulador"):
+          if clave_ingresada == regalo["password"]:
+            st.session_state["fase_27"] = "jugando"
+            st.rerun()
+          elif clave_ingresada == "":
+            st.warning("Por favor, introduce una contraseña.")
+          else:
+            st.error("Contraseña incorrecta. ¡Pista: es 'pokemon'!")
+
+      elif st.session_state["fase_27"] == "jugando":
+        st.success(regalo["mensaje"])
+        st.markdown("---")
+        
+        # URL de la ROM en GitHub y el emulador web integrado
+        nombre_rom = "pokemon.gba" # Asegúrate de tener este archivo en tu repo o cambiar el nombre
+        url_rom_en_github = f"https://raw.githubusercontent.com/TU_USUARIO/TU_REPOSITORIO/main/{nombre_rom}"
+        url_emulador_integrado = f"https://emulatorjs.com/play/gba?rom={url_rom_en_github}"
+
+        # Incrustamos el emulador web directamente en Streamlit
+        st.components.v1.iframe(
+            url_emulador_integrado, 
+            height=550, 
+            scrolling=False
+        )
+
+        if st.button("🔒 Bloquear de nuevo / Salir"):
+          st.session_state["fase_27"] = "bloqueado"
+          st.rerun()
+
     # SI ES LA FECHA ESPECIAL DE PAREJA (31 DE OCTUBRE)
-    if regalo.get("tipo") == "pareja":
+    elif regalo.get("tipo") == "pareja":
       if "fase_31" not in st.session_state:
         st.session_state["fase_31"] = "bloqueado"
 
@@ -670,7 +721,7 @@ with st.container():
       " especial:"
   )
 
-  gusto_input = st.text_input(
+  gusto_input = t = st.text_input(
       "¿Qué sorpresa te gustaría para la próxima?:",
       placeholder="Ej. Un poema, Un regalo, etc...",
   )
