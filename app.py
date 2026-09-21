@@ -160,16 +160,16 @@ calendario_sorpresas = {
     "31-10": {
         "tipo": "pareja",
         "titulo": "???",
-        "password": "tu_contraseña_aqui",
+        "password": "???",
         "poema": (
-            '"Entre risas, miradas y casualidades,<br>'
-            "llegaste a mi vida a cambiar las verdades.<br>"
-            "Eres la magia de cada rincón,<br>"
-            'y el dueño absoluto de este corazón."<br><br>'
+            '"Desde que te vi senti algo especial en ti,<br>'
+            "llegaste a mi vida y todo se volvio mucho mas colorido.<br>"
+            "Eres la luz de mis días,<br>"
+            'Eres como el sol o la luna una vez miro su esplendor ya no puedo mirar nada mas ."<br><br>'
             "<b>— Con amor, Cristóbal</b>"
         ),
         "pregunta": (
-            "Después de todo este tiempo... ¿Quieres ser mi pareja?"
+            "Después de todo este tiempo (242 dias) ... ¿Puedo ser tu novio?"
         ),
         "frases_no": [
             "No",
@@ -183,7 +183,6 @@ calendario_sorpresas = {
         "musica_romantica": "musica_romantica.mp3",
         "musica_batalla": "musica_pokemon.mp3",
         "pokemon_jugador": "Pikachu",
-        # Sprite frontal/trasero fijo y garantizado
         "sprite_jugador": (
             "https://play.pokemonshowdown.com/sprites/gen5/pikachu.png"
         ),
@@ -191,9 +190,13 @@ calendario_sorpresas = {
         "sprite_rival": (
             "https://play.pokemonshowdown.com/sprites/gen5/sylveon.png"
         ),
+        # Sprite seleccionado para el premio al ganar
+        "sprite_premio": (
+            "https://play.pokemonshowdown.com/sprites/gen5/jigglypuff.png"
+        ),
         "pokemon_premio": (
-            "¡Has ganado la batalla y tu premio secreto! Una cita especial o"
-            " regalito por desbloquear mi corazón."
+            "¡Has ganado, aquí está tu premio! Una cita especial o regalito"
+            " por desbloquear mi corazón."
         ),
     },
 }
@@ -209,7 +212,6 @@ with st.expander("Panel de creador (Oculto)"):
       "Clave de administrador:", type="password", key="admin_pass"
   )
 
-  # Contraseña actualizada a NEOX
   if pass_admin == "NEOX":
     st.success("¡Acceso concedido!")
 
@@ -337,7 +339,7 @@ if hoy in calendario_sorpresas:
 
         if st.session_state["fase_31"] == "exito_aceptado":
           st.success(
-              "¡Has aceptado ser mi pareja! Tu respuesta ya ha sido guardada"
+              "¡Has aceptado ser mi novio! Tu respuesta ya ha sido guardada"
               " con éxito."
           )
           st.write(
@@ -368,7 +370,7 @@ if hoy in calendario_sorpresas:
           with col1:
             if st.button("¡SÍ, QUIERO!"):
               guardar_preferencia_formato(
-                  "Aceptó ser mi pareja", "31 de Octubre"
+                  "Aceptó ser mi novio", "31 de Octubre"
               )
               st.session_state["fase_31"] = "exito_aceptado"
               st.rerun()
@@ -378,7 +380,7 @@ if hoy in calendario_sorpresas:
               st.session_state["contador_no"] += 1
               st.rerun()
 
-      # 3. FASE DE LA BATALLA POKÉMON DIFÍCIL Y CON CONTRAATAQUE
+      # 3. FASE DE LA BATALLA POKÉMON CON 4 ATAQUES REALES Y CONTRAATAQUE
       elif st.session_state["fase_31"] == "batalla_pokemon":
         try:
           st.audio(regalo["musica_batalla"], autoplay=True, loop=True)
@@ -407,20 +409,26 @@ if hoy in calendario_sorpresas:
           st.markdown(f"**Tu equipo: {regalo['pokemon_jugador']} (Lv. 50)**")
           st.text(f"HP: {hp_u}%")
         with col_sprite_u:
-          # Sprite de Pikachu garantizado correctamente
           st.image(regalo["sprite_jugador"], width=120)
 
         st.markdown("---")
-        st.write("### Elige tu movimiento:")
+        st.write("### Elige tu movimiento (4 Ataques reales):")
 
+        # 4 botones organizados en 2 columnas para los ataques reales de Pikachu
         col_atq1, col_atq2 = st.columns(2)
         with col_atq1:
-          if st.button("Impactrueno de Amor"):
-            st.session_state["hp_rival"] -= 25  # Quita vida al rival
-            st.session_state["hp_usuario"] -= (
-                20  # El rival contraataca y te quita vida
-            )
+          if st.button("Impactrueno"):
+            st.session_state["hp_rival"] -= 20
+            st.session_state["hp_usuario"] -= 15
+            if st.session_state["hp_usuario"] <= 0:
+              st.session_state["fase_31"] = "derrota"
+            elif st.session_state["hp_rival"] <= 0:
+              st.session_state["fase_31"] = "victoria"
+            st.rerun()
 
+          if st.button("Ataque Rápido"):
+            st.session_state["hp_rival"] -= 15
+            st.session_state["hp_usuario"] -= 15
             if st.session_state["hp_usuario"] <= 0:
               st.session_state["fase_31"] = "derrota"
             elif st.session_state["hp_rival"] <= 0:
@@ -428,12 +436,18 @@ if hoy in calendario_sorpresas:
             st.rerun()
 
         with col_atq2:
-          if st.button("Beso tierno con Boost"):
-            st.session_state["hp_rival"] -= 35  # Quita vida al rival
-            st.session_state["hp_usuario"] -= (
-                20  # El rival contraataca y te quita vida
-            )
+          if st.button("Cola Férrea"):
+            st.session_state["hp_rival"] -= 30
+            st.session_state["hp_usuario"] -= 20
+            if st.session_state["hp_usuario"] <= 0:
+              st.session_state["fase_31"] = "derrota"
+            elif st.session_state["hp_rival"] <= 0:
+              st.session_state["fase_31"] = "victoria"
+            st.rerun()
 
+          if st.button("Rayo"):
+            st.session_state["hp_rival"] -= 35
+            st.session_state["hp_usuario"] -= 25
             if st.session_state["hp_usuario"] <= 0:
               st.session_state["fase_31"] = "derrota"
             elif st.session_state["hp_rival"] <= 0:
@@ -452,22 +466,24 @@ if hoy in calendario_sorpresas:
           st.session_state["fase_31"] = "batalla_pokemon"
           st.rerun()
 
-      # 5. FASE DE VICTORIA EN LA BATALLA
+      # 5. FASE DE VICTORIA (MUESTRA SPRITE SELECCIONADO Y PREMIO)
       elif st.session_state["fase_31"] == "victoria":
         st.balloons()
         st.markdown(
             f"<h2 style='text-align: center; color: #ff5252;'>¡VICTORIA!</h2>",
             unsafe_allow_html=True,
         )
-        st.success(
-            f"¡{regalo['pokemon_jugador']} derrotó a {regalo['pokemon_rival']} con"
-            " éxito tras una dura batalla!"
-        )
+
+        # Mostramos el sprite seleccionado del premio al ganar
+        col_img_premio, col_txt_premio = st.columns([1, 2])
+        with col_img_premio:
+          st.image(regalo["sprite_premio"], width=130)
+        with col_txt_premio:
+          st.success(regalo["pokemon_premio"])
+
         st.markdown("---")
-        st.markdown("### ¡PREMIO DESBLOQUEADO!")
-        st.info(regalo["pokemon_premio"])
         st.write(
-            "¡Muchas gracias por aceptar ser mi pareja! Eres lo mejor de mi"
+            "¡Muchas gracias por aceptar ser mi novio! Eres lo mejor de mi"
             " mundo."
         )
 
