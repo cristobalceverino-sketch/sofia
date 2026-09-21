@@ -10,24 +10,24 @@ st.set_page_config(
 )
 
 
-# --- FUNCIÓN PARA CONVERTIR IMAGEN A BASE64 ---
-def obtener_base64_imagen(ruta_imagen):
-  if os.path.exists(ruta_imagen):
-    with open(ruta_imagen, "rb") as f:
+# --- FUNCIÓN PARA CONVERTIR ARCHIVOS A BASE64 (Ideal para audio y diseño) ---
+def obtener_base64(ruta):
+  if os.path.exists(ruta):
+    with open(ruta, "rb") as f:
       data = f.read()
     return base64.b64encode(data).decode("utf-8")
   return ""
 
 
-# Convertimos las imágenes a base64
-heart_base64 = obtener_base64_imagen("heart.png")
+# Convertimos elementos a base64
+heart_base64 = obtener_base64("heart.png")
 src_heart = (
     f"data:image/png;base64,{heart_base64}"
     if heart_base64
     else "https://via.placeholder.com/25"
 )
 
-gato_base64 = obtener_base64_imagen("gato_fondo.png")
+gato_base64 = obtener_base64("gato_fondo.png")
 src_gato = f"data:image/png;base64,{gato_base64}" if gato_base64 else ""
 
 # --- DISEÑO VISUAL: FONDO NEGRO, GATO GIGANTE Y CORAZONES FLOTANTES ---
@@ -600,20 +600,27 @@ if hoy in calendario_sorpresas:
     st.markdown("</div>", unsafe_allow_html=True)
 
 else:
-  # ZONA DE ESPERA CON LA OPCIÓN 3 (FRASES ALEATORIAS Y MÚSICA DE AMBIENTE)
-  
-  # Reproductor de música para los días de espera (asegúrate de subir 'musica_espera.mp3' a tu repositorio)
-  try:
-    st.audio("musica_espera.mp3", autoplay=True, loop=True)
-  except Exception:
-    pass
+  # ZONA DE ESPERA (AQUÍ SÍ SE REPRODUCE LA MÚSICA DE AMBIENTE DE FORMA AISLADA)
+  audio_espera_base64 = obtener_base64("musica_espera.mp3")
+  if audio_espera_base64:
+    st.markdown(
+        f"""
+        <audio autoplay loop style="display:none;">
+            <source src="data:audio/mp3;base64,{audio_espera_base64}" type="audio/mp3">
+        </audio>
+        """,
+        unsafe_allow_html=True,
+    )
 
   frases_espera = [
       (
           " Pista secreta: La paciencia tiene su recompensa... y la próxima"
           " sorpresa te va a encantar >w<."
       ),
-      " ¿Sabías que? Cada día a tu lado es mi parte favorita de la semana si bien me gustan los dias libres me gustas mas tu.",
+      (
+          " ¿Sabías que? Cada día a tu lado es mi parte favorita de la semana"
+          " si bien me gustan los dias libres me gustas mas tu."
+      ),
       (
           " Recuerda que eres lo más lindo que tengo. ¡Vuelve pronto para más"
           " sorpresas cariño!"
@@ -623,8 +630,8 @@ else:
           " mucho en ti."
       ),
       (
-          " Consejo del día: La vida es mejor contigo. ¡No olvides que eres la mujer que amo!"
-          "  ¡Asi que mantente atenta po otra sorpresa!"
+          " Consejo del día: La vida es mejor contigo. ¡No olvides que eres la"
+          " mujer que amo!  ¡Asi que mantente atenta po otra sorpresa!"
       ),
       (
           " Curiosidad: Cada vez que pienso en ti, mi corazón late más rápido."
@@ -634,9 +641,7 @@ else:
           " Mensaje secreto: Aunque hoy no haya sorpresas, cada día contigo"
           " es una fantasía."
       ),
-      (
-          " Recordatorio: Eres especial y única. ¡No olvides sonreír hoy!"
-      ),
+      (" Recordatorio: Eres especial y única. ¡No olvides sonreír hoy!"),
   ]
 
   with st.container():
