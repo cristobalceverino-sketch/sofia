@@ -212,7 +212,7 @@ with st.container():
 
   gusto_input = st.text_input(
       "¿Qué sorpresa te gustaría para la próxima?:",
-      placeholder="Ej. Una cena, un viaje, chocolates...",
+      placeholder="Ej. Un poema, Un regalo, etc...",
   )
   opcion_preferida = st.selectbox(
       "Elige el día u ocasión preferida:",
@@ -231,7 +231,7 @@ with st.container():
 # ==============================================================================
 # PANEL OCULTO PARA EL CREADOR (REVISAR Y DESCARGAR RESPUESTAS)
 # ==============================================================================
-with st.expander("🛠️ Panel de creador (Oculto)"):
+with st.expander(" Panel de creador (Oculto)"):
   pass_admin = st.text_input(
       "Clave de administrador:", type="password", key="admin_pass"
   )
