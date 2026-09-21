@@ -600,7 +600,14 @@ if hoy in calendario_sorpresas:
     st.markdown("</div>", unsafe_allow_html=True)
 
 else:
-  # ZONA DE ESPERA CON LA OPCIÓN 3 (FRASES ALEATORIAS)
+  # ZONA DE ESPERA CON LA OPCIÓN 3 (FRASES ALEATORIAS Y MÚSICA DE AMBIENTE)
+  
+  # Reproductor de música para los días de espera (asegúrate de subir 'musica_espera.mp3' a tu repositorio)
+  try:
+    st.audio("musica_espera.mp3", autoplay=True, loop=True)
+  except Exception:
+    pass
+
   frases_espera = [
       (
           " Pista secreta: La paciencia tiene su recompensa... y la próxima"
