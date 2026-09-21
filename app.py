@@ -152,7 +152,7 @@ calendario_sorpresas = {
     "31-10": {
         "tipo": "pareja",
         "titulo": "???",
-        "password": "???",  # Cambia por la clave secreta de ese día
+        "password": "tu_contraseña_aqui",  # Cambia por la clave secreta de ese día
         "poema": (
             '"Entre risas, miradas y casualidades,<br>'
             "llegaste a mi vida a cambiar las verdades.<br>"
@@ -227,7 +227,7 @@ if hoy in calendario_sorpresas:
         )
 
         st.markdown("---")
-        st.markdown("La Pregunta Más Importante...")
+        st.markdown("### ❤️ La Pregunta Más Importante...")
         st.write(regalo["pregunta"])
 
         if "contador_no" not in st.session_state:
@@ -240,15 +240,14 @@ if hoy in calendario_sorpresas:
             )
         ]
 
-        ancho_si = min(3 + st.session_state["contador_no"], 5)
-        ancho_no = max(3 - (st.session_state["contador_no"] // 2), 1)
+        # Hacemos que el botón 'Sí' crezca mucho más rápido con cada intento en el 'No'
+        ancho_si = min(2 + (st.session_state["contador_no"] * 2), 10)
+        ancho_no = max(4 - st.session_state["contador_no"], 1)
 
         col1, col2 = st.columns([ancho_si, ancho_no])
 
         with col1:
-          if st.button(
-              f"¡SÍ, QUIERO! {' ' * st.session_state['contador_no']}"
-          ):
+          if st.button("¡SÍ, QUIERO! ❤️"):
             st.markdown(
                 """
                 <style>
@@ -285,10 +284,7 @@ if hoy in calendario_sorpresas:
             )
 
             st.balloons()
-            st.success(
-                "¡Yupieee! Me encantas. Te amo"
-                " muchísimo."
-            )
+            st.success("¡Yupieee! Me encantas. Te amo muchísimo.")
             guardar_preferencia_formato(
                 "Aceptó ser mi pareja ❤️", "31 de Octubre"
             )
