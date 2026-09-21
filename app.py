@@ -153,7 +153,7 @@ calendario_sorpresas = {
 }
 
 # --- INTERFAZ VISUAL PRINCIPAL ---
-st.markdown("<h1>Caja Fuerte de Sorpresas</h1>", unsafe_allow_html=True)
+st.markdown("<h1>Caja Fuerte</h1>", unsafe_allow_html=True)
 st.markdown(
     f"<p style='text-align: center; color: #888;'>Fecha actual: {fecha_larga}</p>",
     unsafe_allow_html=True,
