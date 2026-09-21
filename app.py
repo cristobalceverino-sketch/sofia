@@ -199,7 +199,6 @@ calendario_sorpresas = {
         "pregunta": (
             "Después de todo este tiempo (242 dias) ... ¿Puedo ser tu novio?"
             # Cambiado a "novia" para el rol correcto
-            .replace("ser tu novio", "ser mi novia")
         ),
         "frases_no": [
             "No",
@@ -356,7 +355,7 @@ if hoy in calendario_sorpresas:
         st.success("¡Contraseña correcta! Desbloqueando momento especial...")
 
         st.markdown("---")
-        st.markdown("### Una pequeña cuenta regresiva hacia tu corazón...")
+        st.markdown("### Una pequeña cuenta regresiva...")
         st.info(
             "Cada segundo que pasa desde que nos conocimos ha valido la pena"
             " por completo..."
@@ -379,7 +378,7 @@ if hoy in calendario_sorpresas:
 
         if st.session_state["fase_31"] == "exito_aceptado":
           st.success(
-              "¡Has aceptado ser mi novia! Gracias por ser mi novia y hacer"
+              "¡Has aceptado ser mi novia! Gracias, haces"
               " mi vida mucho más feliz. Tu respuesta ya ha sido guardada con"
               " éxito."
           )
@@ -458,7 +457,7 @@ if hoy in calendario_sorpresas:
         st.markdown(
             f"""
             <div class="consola-rival">
-                🖥️ CONSOLA RIVAL: {st.session_state.get('ultimo_movimiento_rival', 'Esperando movimiento...')}
+                CONSOLA RIVAL: {st.session_state.get('ultimo_movimiento_rival', 'Esperando movimiento...')}
             </div>
             """,
             unsafe_allow_html=True,
