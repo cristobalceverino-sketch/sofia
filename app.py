@@ -4,56 +4,75 @@ import streamlit as st
 
 # --- CONFIGURACIÓN DE LA PÁGINA ---
 st.set_page_config(
-    page_title="Un detalle para ti 💖", page_icon="🌻", layout="centered"
+    page_title="Caja Fuerte de Sorpresas", page_icon="🔒", layout="centered"
 )
 
-# --- DISEÑO VISUAL (CSS PERSONALIZADO) ---
-# Esto cambia los colores, fuentes y le da un aspecto de tarjeta romántica y moderna
+# --- DISEÑO VISUAL: FONDO NEGRO Y CORAZONES FLOTANTES ---
 st.markdown(
     """
     <style>
-    /* Fondo general de la aplicación */
+    /* Fondo negro general de la aplicación */
     .stApp {
-        background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%);
+        background-color: #0b0b0b;
+        color: #ffffff;
     }
     
-    /* Estilo para las "tarjetas" de contenido */
+    /* Estilo para las tarjetas de contenido estilo gamer/oscuro */
     .card {
-        background-color: white;
+        background-color: #161616;
         padding: 25px;
-        border-radius: 20px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        border-radius: 15px;
+        border: 2px solid #333333;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.8);
         margin-bottom: 20px;
     }
     
-    /* Títulos principales */
-    h1 {
-        color: #d81b60;
+    /* Títulos con estilo retro/pixel */
+    h1, h3 {
+        color: #ff5252;
+        font-family: 'Courier New', monospace;
         text-align: center;
-        font-family: 'Helvetica Neue', sans-serif;
-    }
-    
-    /* Subtítulos */
-    h3 {
-        color: #880e4f;
     }
     
     /* Estilo de los botones */
     .stButton>button {
-        background: linear-gradient(90deg, #ec407a 0%, #ab47bc 100%);
+        background: linear-gradient(90deg, #ff5252 0%, #c62828 100%);
         color: white;
         border-radius: 25px;
         padding: 10px 25px;
         border: none;
         font-weight: bold;
-        box-shadow: 0 4px 10px rgba(236, 64, 122, 0.3);
+        box-shadow: 0 4px 10px rgba(255, 82, 82, 0.3);
         width: 100%;
     }
     .stButton>button:hover {
-        background: linear-gradient(90deg, #d81b60 0%, #8e24aa 100%);
+        background: linear-gradient(90deg, #d32f2f 0%, #b71c1c 100%);
         color: white;
     }
+
+    /* Animación de corazones flotantes de fondo */
+    @keyframes flotar {
+        0% { transform: translateY(0vh) scale(0.8); opacity: 0; }
+        50% { opacity: 0.9; }
+        100% { transform: translateY(-110vh) scale(1.2); opacity: 0; }
+    }
+    
+    .corazon-pixel {
+        position: fixed;
+        bottom: -10vh;
+        width: 25px;
+        height: 25px;
+        animation: flotar 6s infinite linear;
+        z-index: 999;
+        user-select: none;
+    }
     </style>
+
+    <!-- Corazones flotantes usando tu imagen pixelada (heart.png) -->
+    <img src="heart.png" class="corazon-pixel" style="left: 10%; animation-duration: 5s;">
+    <img src="heart.png" class="corazon-pixel" style="left: 30%; animation-duration: 7s; animation-delay: 1.5s;">
+    <img src="heart.png" class="corazon-pixel" style="left: 60%; animation-duration: 6s; animation-delay: 2.5s;">
+    <img src="heart.png" class="corazon-pixel" style="left: 85%; animation-duration: 8s; animation-delay: 1s;">
 """,
     unsafe_allow_html=True,
 )
@@ -64,7 +83,6 @@ def guardar_dato_secreto(categoria, valor):
   fecha_actual = datetime.now().strftime("%d/%m/%Y %H:%M")
   registro = f"[{fecha_actual}] Categoria: {categoria} | Dato: {valor}\n"
 
-  # Se guarda en un archivo de texto en tu proyecto
   with open("datos_sorpresas_futuras.txt", "a", encoding="utf-8") as f:
     f.write(registro)
 
@@ -73,94 +91,110 @@ def guardar_dato_secreto(categoria, valor):
 hoy = datetime.now().strftime("%d-%m")
 fecha_larga = datetime.now().strftime("%d/%m/%Y")
 
-# Base de datos de sorpresas según el día del año
-regalos_especiales = {
+# ==============================================================================
+# AQUÍ PUEDES PERSONALIZAR LAS FECHAS, CONTRASEÑAS, TÍTULOS Y MENSAJES A TU GUSTO
+# ==============================================================================
+calendario_sorpresas = {
     "14-02": {
-        "titulo": "¡Feliz San Valentín! 💖",
-        "mensaje": (
-            "Aunque todos los días son buenos para decirte lo mucho que"
-            " vales, hoy toca recordártelo oficialmente. Eres de lo más bonito"
-            " que tengo."
-        ),
-        "imagen": "https://images.unsplash.com/photo-1518199266791-5375a83190b7",
+        "titulo": "San Valentin",
+        "password": "tu_contraseña_aqui",  # Cambia por tu clave secreta
+        "mensaje": "Escribe aqui tu mensaje personalizado para esta fecha.",
+        "video": "video_san_valentin.mp4",
     },
     "21-09": {
-        "titulo": "¡Feliz día de las flores amarillas! 🌻",
+        "titulo": "Dia de las Flores Amarillas",
+        "password": "Te_Amo",  # Cambia por tu clave secreta
         "mensaje": (
-            "Dicen que regalar flores amarillas significa que quieres que"
-            " alguien se quede para siempre. Te hice este pequeño espacio"
-            " digital porque iluminas mis días como nadie."
+            "Me gustas hace mucho tiempo y la verdad pense en hacer algo especial para ti. "
+            " asi que aqui tienes tu primer sorpresa, espero que te guste y que la disfrutes mucho. "
         ),
-        "imagen": "https://images.unsplash.com/photo-1597848212624-a19eb35e2651",
+        "video": (  # Nombre de tu video subido a GitHub (ej: caramelldansen.mp4)
+            "video_flores_amarillas.mp4"
+        ),
     },
 }
 
-# --- INTERFAZ VISUAL ---
-st.markdown("<h1>✨ Un rincón especial para ti ✨</h1>", unsafe_allow_html=True)
+# --- INTERFAZ VISUAL PRINCIPAL ---
+st.markdown("<h1>Caja Fuerte de Sorpresas</h1>", unsafe_allow_html=True)
 st.markdown(
-    f"<p style='text-align: center; color: #666;'>📅 {fecha_larga}</p>",
+    f"<p style='text-align: center; color: #888;'>Fecha actual: {fecha_larga}</p>",
     unsafe_allow_html=True,
 )
 
-# Contenedor principal con diseño de tarjeta
-with st.container():
-  st.markdown('<div class="card">', unsafe_allow_html=True)
+# Verificar si hoy hay sorpresa programada
+if hoy in calendario_sorpresas:
+  regalo = calendario_sorpresas[hoy]
 
-  if hoy in regalos_especiales:
-    regalo = regalos_especiales[hoy]
-    st.balloons()  # Lluvia de globos visual en la pantalla
+  with st.container():
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader(regalo["titulo"])
-    st.write(regalo["mensaje"])
-
-    # Mostramos una imagen bonita relacionada con la fecha
-    st.image(regalo["imagen"], use_container_width=True)
-  else:
-    st.subheader("💌 Mensaje de hoy")
     st.write(
-        "Hoy es un día tranquilo, pero quiero recordarte que no hace falta una"
-        " fecha especial para sorprenderte."
-    )
-    st.image(
-        "https://images.unsplash.com/photo-1534447677768-be436bb09401",
-        use_container_width=True,
+        "Hay una sorpresa bloqueada para hoy. Introduce la contraseña secreta"
+        " para abrirla."
     )
 
-  st.markdown("</div>", unsafe_allow_html=True)
+    # Input de contraseña
+    clave_ingresada = st.text_input("Ingresa la contraseña:", type="password")
+
+    if st.button("Desbloquear sorpresa"):
+      if clave_ingresada == regalo["password"]:
+        st.success("Contraseña correcta. Desbloqueando regalo...")
+        st.balloons()
+        st.write(regalo["mensaje"])
+
+        # Reproductor de video personalizado
+        try:
+          st.video(regalo["video"])
+        except Exception:
+          st.warning(
+              "No se encontró el archivo de video. Asegúrate de subirlo a"
+              " GitHub con el mismo nombre."
+          )
+
+      elif clave_ingresada == "":
+        st.warning("Por favor, introduce una contraseña.")
+      else:
+        st.error("Contraseña incorrecta. Intentalo de nuevo.")
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+else:
+  with st.container():
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.subheader("Zona de espera")
+    st.write(
+        "Hoy es un día tranquilo y no hay cajas fuertes abiertas. Vuelve en"
+        " otra fecha especial para descubrir nuevas sorpresas."
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # --- SECCIÓN INTERACTIVA PARA GUARDAR DATOS (Tus planes futuros) ---
 with st.container():
   st.markdown('<div class="card">', unsafe_allow_html=True)
-  st.subheader("💡 Pequeño Buzón de Secretos")
-  st.write(
-      "Déjame saber un poquito más de ti para planear las siguientes"
-      " sorpresas:"
-  )
+  st.subheader("Buzón de Secretos")
+  st.write("Déjame saber un poquito más para planear las siguientes sorpresas:")
 
-  # Pregunta 1: Guardar una preferencia (ej: su comida o dulce favorito)
-  gusto_input = st.text_input(
-      "¿Cuál es tu antojo o dulce favorito para nuestra próxima salida? 🍫"
-  )
-  if st.button("Guardar mi respuesta 🤫", key="btn_gusto"):
+  gusto_input = st.text_input("Escribe algo que te guste para la proxima:")
+  if st.button("Guardar mi respuesta", key="btn_gusto"):
     if gusto_input:
-      guardar_dato_secreto("Antojo Favorito", gusto_input)
-      st.success("¡Guardado! (Ya tomé nota para la próxima 🤭).")
+      guardar_dato_secreto("Preferencia", gusto_input)
+      st.success("Guardado con exito.")
     else:
       st.warning("Escribe algo antes de guardar.")
 
   st.markdown("---")
 
-  # Pregunta 2: Escoger una opción (para registrar datos estructurados)
-  cancion_preferida = st.selectbox(
-      "¿Qué tipo de música pega más con este momento?",
+  opcion_preferida = st.selectbox(
+      "Elige una opcion:",
       [
-          "Romántica / Tranquila 🎸",
-          "Pop alegre 🎵",
-          "Lo-Fi para relajarse ☕",
-          "Sorpréndeme en la próxima 🎧",
+          "Opcion uno",
+          "Opcion dos",
+          "Opcion tres",
+          "Sorpresa",
       ],
   )
-  if st.button("Registrar estilo musical ✨", key="btn_musica"):
-    guardar_dato_secreto("Estilo Musical", cancion_preferida)
-    st.success("¡Registrado con éxito!")
+  if st.button("Registrar seleccion", key="btn_opcion"):
+    guardar_dato_secreto("Seleccion", opcion_preferida)
+    st.success("Registrado con exito.")
 
   st.markdown("</div>", unsafe_allow_html=True)
