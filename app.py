@@ -1,3 +1,4 @@
+import base64
 from datetime import datetime
 import os
 import streamlit as st
@@ -7,35 +8,53 @@ st.set_page_config(
     page_title="Caja Fuerte de Sorpresas", page_icon="🔒", layout="centered"
 )
 
+
+# --- FUNCIÓN PARA CONVERTIR IMAGEN A BASE64 ---
+def obtener_base64_imagen(ruta_imagen):
+  if os.path.exists(ruta_imagen):
+    with open(ruta_imagen, "rb") as f:
+      data = f.read()
+    return base64.b64encode(data).decode("utf-8")
+  return ""
+
+
+# Convertimos la imagen 'heart.png' a base64
+heart_base64 = obtener_base64_imagen("heart.png")
+src_imagen = (
+    f"data:image/png;base64,{heart_base64}"
+    if heart_base64
+    else "https://via.placeholder.com/25"
+)
+
 # --- DISEÑO VISUAL: FONDO NEGRO Y CORAZONES FLOTANTES ---
 st.markdown(
-    """
+    f"""
     <style>
     /* Fondo negro general de la aplicación */
-    .stApp {
+    .stApp {{
         background-color: #0b0b0b;
         color: #ffffff;
-    }
+    }}
     
     /* Estilo para las tarjetas de contenido estilo gamer/oscuro */
-    .card {
+    .card {{
         background-color: #161616;
         padding: 25px;
         border-radius: 15px;
         border: 2px solid #333333;
         box-shadow: 0 8px 20px rgba(0,0,0,0.8);
         margin-bottom: 20px;
-    }
+    }}
     
     /* Títulos con estilo retro/pixel */
-    h1, h3 {
+    h1, h3 {{
         color: #ff5252;
         font-family: 'Courier New', monospace;
         text-align: center;
-    }
+    }}
     
     /* Estilo de los botones */
-    .stButton>button {
+    .stButton>button {{
         background: linear-gradient(90deg, #ff5252 0%, #c62828 100%);
         color: white;
         border-radius: 25px;
@@ -44,20 +63,20 @@ st.markdown(
         font-weight: bold;
         box-shadow: 0 4px 10px rgba(255, 82, 82, 0.3);
         width: 100%;
-    }
-    .stButton>button:hover {
+    }}
+    .stButton>button:hover {{
         background: linear-gradient(90deg, #d32f2f 0%, #b71c1c 100%);
         color: white;
-    }
+    }}
 
     /* Animación de corazones flotantes de fondo */
-    @keyframes flotar {
-        0% { transform: translateY(0vh) scale(0.8); opacity: 0; }
-        50% { opacity: 0.9; }
-        100% { transform: translateY(-110vh) scale(1.2); opacity: 0; }
-    }
+    @keyframes flotar {{
+        0% {{ transform: translateY(0vh) scale(0.8); opacity: 0; }}
+        50% {{ opacity: 0.9; }}
+        100% {{ transform: translateY(-110vh) scale(1.2); opacity: 0; }}
+    }}
     
-    .corazon-pixel {
+    .corazon-pixel {{
         position: fixed;
         bottom: -10vh;
         width: 25px;
@@ -65,14 +84,14 @@ st.markdown(
         animation: flotar 6s infinite linear;
         z-index: 999;
         user-select: none;
-    }
+    }}
     </style>
 
-    <!-- Corazones flotantes usando tu imagen pixelada (heart.png) -->
-    <img src="heart.png" class="corazon-pixel" style="left: 10%; animation-duration: 5s;">
-    <img src="heart.png" class="corazon-pixel" style="left: 30%; animation-duration: 7s; animation-delay: 1.5s;">
-    <img src="heart.png" class="corazon-pixel" style="left: 60%; animation-duration: 6s; animation-delay: 2.5s;">
-    <img src="heart.png" class="corazon-pixel" style="left: 85%; animation-duration: 8s; animation-delay: 1s;">
+    <!-- Corazones flotantes usando la imagen en Base64 -->
+    <img src="{src_imagen}" class="corazon-pixel" style="left: 10%; animation-duration: 5s;">
+    <img src="{src_imagen}" class="corazon-pixel" style="left: 30%; animation-duration: 7s; animation-delay: 1.5s;">
+    <img src="{src_imagen}" class="corazon-pixel" style="left: 60%; animation-duration: 6s; animation-delay: 2.5s;">
+    <img src="{src_imagen}" class="corazon-pixel" style="left: 85%; animation-duration: 8s; animation-delay: 1s;">
 """,
     unsafe_allow_html=True,
 )
@@ -106,7 +125,7 @@ calendario_sorpresas = {
         "password": "Te_Amo",  # Cambia por tu clave secreta
         "mensaje": (
             "Me gustas hace mucho tiempo y la verdad pense en hacer algo especial para ti. "
-            " asi que aqui tienes tu primer sorpresa, espero que te guste y que la disfrutes mucho. "
+            " asi que aqui tienes tu primer sorpresa, espero que te guste y que la disfrutes mucho. Con amor, cristobal."
         ),
         "video": (  # Nombre de tu video subido a GitHub (ej: caramelldansen.mp4)
             "video_flores_amarillas.mp4"
@@ -187,10 +206,10 @@ with st.container():
   opcion_preferida = st.selectbox(
       "Elige una opcion:",
       [
-          "Opcion uno",
-          "Opcion dos",
-          "Opcion tres",
-          "Sorpresa",
+          "navidad",
+          "Año Nuevo",
+          "San Valentin",
+          "Cumpleaños",
       ],
   )
   if st.button("Registrar seleccion", key="btn_opcion"):
