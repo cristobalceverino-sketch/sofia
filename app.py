@@ -1,6 +1,8 @@
 import base64
-import random
 from datetime import datetime
+import random
+from zoneinfo import ZoneInfo  # <-- Librería para manejar la zona horaria
+
 os = __import__("os")
 import streamlit as st
 
@@ -159,9 +161,11 @@ def guardar_preferencia_formato(sorpresa, dia_elegido):
     f.write(registro)
 
 
-# --- VERIFICACIÓN DE FECHA REAL ---
-fecha_real = datetime.now().strftime("%d-%m")
-fecha_larga = datetime.now().strftime("%d/%m/%Y")
+# --- VERIFICACIÓN DE FECHA REAL (ZONA HORARIA DE CHILE) ---
+zona_chile = ZoneInfo("America/Santiago")
+ahora_chile = datetime.now(zona_chile)
+fecha_real = ahora_chile.strftime("%d-%m")
+fecha_larga = ahora_chile.strftime("%d/%m/%Y")
 
 # ==============================================================================
 # CALENDARIO DE SORPRESAS
@@ -184,13 +188,6 @@ calendario_sorpresas = {
             " espero que te guste y que la disfrutes mucho. Con amor, Cristóbal."
         ),
         "video": "video_flores_amarillas.mp4",
-    },
-    # --- ANIVERSARIO POKÉMON (27 DE FEBRERO) ---
-    "27-02": {
-        "tipo": "emulador_pokemon",
-        "titulo": "Aniversario Pokémon",
-        "password": "pokemon",
-        "mensaje": "¡Has desbloqueado el emulador exclusivo de batallas Pokémon! Prepárate para la aventura.",
     },
     "31-10": {
         "tipo": "pareja",
@@ -259,7 +256,6 @@ with st.expander("Panel de creador (Oculto)"):
             "Fecha real (Automática)",
             "14-02 (San Valentín)",
             "21-09 (Flores Amarillas)",
-            "27-02 (Aniversario Pokémon - Emulador)",
             "31-10 (Pregunta de Pareja)",
             "Día sin sorpresas (Zona de espera)",
         ],
@@ -269,8 +265,6 @@ with st.expander("Panel de creador (Oculto)"):
       hoy = "14-02"
     elif modo_prueba == "21-09 (Flores Amarillas)":
       hoy = "21-09"
-    elif modo_prueba == "27-02 (Aniversario Pokémon - Emulador)":
-      hoy = "27-02"
     elif modo_prueba == "31-10 (Pregunta de Pareja)":
       hoy = "31-10"
     elif modo_prueba == "Día sin sorpresas (Zona de espera)":
@@ -312,7 +306,7 @@ with st.expander("Panel de creador (Oculto)"):
       st.error("Contraseña incorrecta.")
 
 st.markdown(
-    f"<p style='text-align: center; color: #888;'>Fecha actual simulada: {hoy}</p>",
+    f"<p style='text-align: center; color: #888;'>Fecha actual simulada (Chile): {hoy}</p>",
     unsafe_allow_html=True,
 )
 
@@ -324,59 +318,12 @@ if hoy in calendario_sorpresas:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader(regalo["titulo"])
 
-    # --- LÓGICA DEL EMULADOR POKÉMON (27 DE FEBRERO) ---
-    if regalo.get("tipo") == "emulador_pokemon":
-      if "fase_27" not in st.session_state:
-        st.session_state["fase_27"] = "bloqueado"
-
-      if st.session_state["fase_27"] == "bloqueado":
-        st.write(
-            "Hay una caja misteriosa del **Aniversario Pokémon** bloqueada para hoy."
-            " Introduce la contraseña secreta (`pokemon`) para abrirla..."
-        )
-        clave_ingresada = st.text_input("Ingresa la contraseña:", type="password", key="pass_27")
-
-        if st.button("Desbloquear Emulador"):
-          if clave_ingresada == regalo["password"]:
-            st.session_state["fase_27"] = "jugando"
-            st.rerun()
-          elif clave_ingresada == "":
-            st.warning("Por favor, introduce una contraseña.")
-          else:
-            st.error("Contraseña incorrecta. ¡Pista: es 'pokemon'!")
-
-      elif st.session_state["fase_27"] == "jugando":
-        st.success(regalo["mensaje"])
-        st.markdown("---")
-        
-        # Enlace directo configurado con tus datos de GitHub (cristobalceverino-sketch / sofia)
-        nombre_rom = "pokemon.gba"
-        url_rom_en_github = f"https://raw.githubusercontent.com/cristobalceverino-sketch/sofia/main/{nombre_rom}"
-        url_emulador_integrado = f"https://emulatorjs.com/play/gba?rom={url_rom_en_github}"
-
-        st.markdown("""
-            <div style="text-align: center; padding: 20px; background-color: #161616; border-radius: 15px; border: 2px solid #ff5252; margin-bottom: 15px;">
-                <h3 style="color: #ff5252; margin-bottom: 10px;">🎮 ¡Tu ROM de Pokémon está lista!</h3>
-                <p style="color: #ccc; font-size: 14px;">
-                    Haz clic en el botón de abajo para abrir el emulador en una pestaña nueva y jugar sin restricciones:
-                </p>
-            </div>
-        """, unsafe_allow_html=True)
-
-        # Botón nativo oficial de Streamlit que abre el emulador de forma limpia
-        st.link_button("🚀 Jugar Pokémon GBA Ahora", url_emulador_integrado, use_container_width=True)
-
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        if st.button("🔒 Bloquear de nuevo / Salir"):
-          st.session_state["fase_27"] = "bloqueado"
-          st.rerun()
-
     # SI ES LA FECHA ESPECIAL DE PAREJA (31 DE OCTUBRE)
-    elif regalo.get("tipo") == "pareja":
+    if regalo.get("tipo") == "pareja":
       if "fase_31" not in st.session_state:
         st.session_state["fase_31"] = "bloqueado"
 
+      # 1. FASE DE CONTRASEÑA
       if st.session_state["fase_31"] == "bloqueado":
         st.write(
             "Hay una caja misteriosa bloqueada para hoy. Introduce la contraseña"
@@ -391,6 +338,7 @@ if hoy in calendario_sorpresas:
           else:
             st.error("Contraseña incorrecta. ¡Inténtalo de nuevo!")
 
+      # 2. FASE DEL POEMA Y PREGUNTA
       elif st.session_state["fase_31"] in [
           "poema",
           "exito_aceptado",
@@ -494,6 +442,7 @@ if hoy in calendario_sorpresas:
                 st.session_state["contador_no"] += 1
               st.rerun()
 
+      # 3. FASE DE LA BATALLA POKÉMON CON CONSOLA Y ANIMACIÓN DE SPRITES
       elif st.session_state["fase_31"] == "batalla_pokemon":
         try:
           st.audio(regalo["musica_batalla"], autoplay=True, loop=True)
@@ -592,6 +541,7 @@ if hoy in calendario_sorpresas:
           if st.button("Rayo"):
             procesar_turno_jugador(35)
 
+      # 4. FASE DE DERROTA EN LA BATALLA
       elif st.session_state["fase_31"] == "derrota":
         st.error(
             f"¡Tu {regalo['pokemon_jugador']} se quedó sin energía contra"
@@ -606,6 +556,7 @@ if hoy in calendario_sorpresas:
           st.session_state["fase_31"] = "batalla_pokemon"
           st.rerun()
 
+      # 5. FASE DE VICTORIA (MUESTRA SPRITE SELECCIONADO Y PREMIO)
       elif st.session_state["fase_31"] == "victoria":
         st.balloons()
         st.markdown(
@@ -653,6 +604,7 @@ if hoy in calendario_sorpresas:
     st.markdown("</div>", unsafe_allow_html=True)
 
 else:
+  # ZONA DE ESPERA (AQUÍ SÍ SE REPRODUCE LA MÚSICA DE AMBIENTE DE FORMA AISLADA)
   audio_espera_base64 = obtener_base64("musica_espera.mp3")
   if audio_espera_base64:
     st.markdown(
