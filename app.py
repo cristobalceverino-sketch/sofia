@@ -185,7 +185,7 @@ calendario_sorpresas = {
         ),
         "video": "video_flores_amarillas.mp4",
     },
-    # --- NUEVA FECHA: ANIVERSARIO POKÉMON ---
+    # --- ANIVERSARIO POKÉMON (27 DE FEBRERO) ---
     "27-02": {
         "tipo": "emulador_pokemon",
         "titulo": "Aniversario Pokémon",
@@ -324,7 +324,7 @@ if hoy in calendario_sorpresas:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader(regalo["titulo"])
 
-    # --- SI ES LA FECHA ESPECIAL DEL EMULADOR POKÉMON (27 DE FEBRERO) ---
+    # --- LÓGICA DEL EMULADOR POKÉMON (27 DE FEBRERO) ---
     if regalo.get("tipo") == "emulador_pokemon":
       if "fase_27" not in st.session_state:
         st.session_state["fase_27"] = "bloqueado"
@@ -349,9 +349,9 @@ if hoy in calendario_sorpresas:
         st.success(regalo["mensaje"])
         st.markdown("---")
         
-        # URL de la ROM en GitHub y el emulador web integrado
-        nombre_rom = "pokemon.gba" # Asegúrate de tener este archivo en tu repo o cambiar el nombre
-        url_rom_en_github = f"https://raw.githubusercontent.com/TU_USUARIO/TU_REPOSITORIO/main/{nombre_rom}"
+        # Enlace directo configurado con tus datos de GitHub (cristobalceverino-sketch / sofia)
+        nombre_rom = "pokemon.gba"
+        url_rom_en_github = f"https://raw.githubusercontent.com/cristobalceverino-sketch/sofia/main/{nombre_rom}"
         url_emulador_integrado = f"https://emulatorjs.com/play/gba?rom={url_rom_en_github}"
 
         # Incrustamos el emulador web directamente en Streamlit
@@ -370,7 +370,6 @@ if hoy in calendario_sorpresas:
       if "fase_31" not in st.session_state:
         st.session_state["fase_31"] = "bloqueado"
 
-      # 1. FASE DE CONTRASEÑA
       if st.session_state["fase_31"] == "bloqueado":
         st.write(
             "Hay una caja misteriosa bloqueada para hoy. Introduce la contraseña"
@@ -385,7 +384,6 @@ if hoy in calendario_sorpresas:
           else:
             st.error("Contraseña incorrecta. ¡Inténtalo de nuevo!")
 
-      # 2. FASE DEL POEMA Y PREGUNTA
       elif st.session_state["fase_31"] in [
           "poema",
           "exito_aceptado",
@@ -489,7 +487,6 @@ if hoy in calendario_sorpresas:
                 st.session_state["contador_no"] += 1
               st.rerun()
 
-      # 3. FASE DE LA BATALLA POKÉMON CON CONSOLA Y ANIMACIÓN DE SPRITES
       elif st.session_state["fase_31"] == "batalla_pokemon":
         try:
           st.audio(regalo["musica_batalla"], autoplay=True, loop=True)
@@ -588,7 +585,6 @@ if hoy in calendario_sorpresas:
           if st.button("Rayo"):
             procesar_turno_jugador(35)
 
-      # 4. FASE DE DERROTA EN LA BATALLA
       elif st.session_state["fase_31"] == "derrota":
         st.error(
             f"¡Tu {regalo['pokemon_jugador']} se quedó sin energía contra"
@@ -603,7 +599,6 @@ if hoy in calendario_sorpresas:
           st.session_state["fase_31"] = "batalla_pokemon"
           st.rerun()
 
-      # 5. FASE DE VICTORIA (MUESTRA SPRITE SELECCIONADO Y PREMIO)
       elif st.session_state["fase_31"] == "victoria":
         st.balloons()
         st.markdown(
@@ -651,7 +646,6 @@ if hoy in calendario_sorpresas:
     st.markdown("</div>", unsafe_allow_html=True)
 
 else:
-  # ZONA DE ESPERA (AQUÍ SÍ SE REPRODUCE LA MÚSICA DE AMBIENTE DE FORMA AISLADA)
   audio_espera_base64 = obtener_base64("musica_espera.mp3")
   if audio_espera_base64:
     st.markdown(
@@ -721,7 +715,7 @@ with st.container():
       " especial:"
   )
 
-  gusto_input = t = st.text_input(
+  gusto_input = st.text_input(
       "¿Qué sorpresa te gustaría para la próxima?:",
       placeholder="Ej. Un poema, Un regalo, etc...",
   )
