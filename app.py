@@ -354,12 +354,19 @@ if hoy in calendario_sorpresas:
         url_rom_en_github = f"https://raw.githubusercontent.com/cristobalceverino-sketch/sofia/main/{nombre_rom}"
         url_emulador_integrado = f"https://emulatorjs.com/play/gba?rom={url_rom_en_github}"
 
-        # Incrustamos el emulador web directamente en Streamlit
-        st.components.v1.iframe(
-            url_emulador_integrado, 
-            height=550, 
-            scrolling=False
-        )
+        st.markdown("""
+            <div style="text-align: center; padding: 20px; background-color: #161616; border-radius: 15px; border: 2px solid #ff5252; margin-bottom: 15px;">
+                <h3 style="color: #ff5252; margin-bottom: 10px;">🎮 ¡Tu ROM de Pokémon está lista!</h3>
+                <p style="color: #ccc; font-size: 14px;">
+                    Haz clic en el botón de abajo para abrir el emulador en una pestaña nueva y jugar sin restricciones:
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
+
+        # Botón nativo oficial de Streamlit que abre el emulador de forma limpia
+        st.link_button("🚀 Jugar Pokémon GBA Ahora", url_emulador_integrado, use_container_width=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
 
         if st.button("🔒 Bloquear de nuevo / Salir"):
           st.session_state["fase_27"] = "bloqueado"
